@@ -137,6 +137,11 @@ struct ActivitiesTab: View {
                         HistoryRunRow(run: run)
                     }
                 }
+                .onDelete { indexSet in
+                    for index in indexSet {
+                        runStore.deleteRun(id: runStore.history[index].id)
+                    }
+                }
             }
         } header: {
             HStack {

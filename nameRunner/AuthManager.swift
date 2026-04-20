@@ -45,6 +45,40 @@ final class AuthManager {
         currentUser = nil
     }
 
+    func deleteAccount() async throws {
+        guard let user = currentUser else { return }
+        // Best-effort Firestore cleanup — don't block deletion if it fails
+        try? await FirestoreService.deleteUserData(uid: user.uid)
+        try await user.delete()
+        GIDSignIn.sharedInstance.signOut()
+        currentUser = nil
+    }
+
+    // MARK: - Profile
+
+    var displayName: String? { currentUser?.displayName }
+    var isEmailPasswordUser: Bool {
+        currentUser?.providerData.contains(where: { $0.providerID == "password" }) ?? false
+    }
+
+    func updateDisplayName(_ name: String) async throws {
+        guard let user = currentUser else { return }
+        let request = user.createProfileChangeRequest()
+        request.displayName = name.trimmingCharacters(in: .whitespaces)
+        try await request.commitChanges()
+        try await Auth.auth().currentUser?.reload()
+        // Nil-then-reassign forces @Observable to detect the change
+        currentUser = nil
+        currentUser = Auth.auth().currentUser
+    }
+
+    func updatePassword(currentPassword: String, newPassword: String) async throws {
+        guard let user = currentUser, let email = user.email else { return }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: currentPassword)
+        try await user.reauthenticate(with: credential)
+        try await user.updatePassword(to: newPassword)
+    }
+
     // MARK: - Google
 
     @MainActor

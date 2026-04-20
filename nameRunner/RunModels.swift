@@ -238,6 +238,13 @@ final class RunStore {
         history = []
     }
 
+    func deleteRun(id: UUID) {
+        history.removeAll { $0.id == id }
+        if let uid = authManager.currentUser?.uid {
+            Task { try? await FirestoreService.deleteRun(id: id, for: uid) }
+        }
+    }
+
     private func finalizeActiveRun(celebrate: Bool) {
         guard let session = activeSession else { return }
         session.pause()

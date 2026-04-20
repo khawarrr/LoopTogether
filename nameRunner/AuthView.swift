@@ -10,6 +10,7 @@ struct AuthView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var isSignUp = false
+    @State private var name = ""
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
@@ -43,6 +44,13 @@ struct AuthView: View {
 
                     // Input fields
                     VStack(spacing: 12) {
+                        if isSignUp {
+                            TextField("Name", text: $name)
+                                .textContentType(.name)
+                                .autocapitalization(.words)
+                                .textFieldStyle(.roundedBorder)
+                        }
+
                         TextField("Email", text: $email)
                             .textContentType(.emailAddress)
                             .keyboardType(.emailAddress)
@@ -161,6 +169,9 @@ struct AuthView: View {
         do {
             if isSignUp {
                 try await authManager.signUp(email: email, password: password)
+                if !name.trimmingCharacters(in: .whitespaces).isEmpty {
+                    try await authManager.updateDisplayName(name)
+                }
             } else {
                 try await authManager.signIn(email: email, password: password)
             }

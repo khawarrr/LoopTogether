@@ -11,6 +11,11 @@ struct ProfileTab: View {
     @Environment(AuthManager.self) private var authManager
 
     @State private var showAuth = false
+    @State private var showEditProfile = false
+    @State private var showChangePassword = false
+    @State private var showDeleteConfirmation = false
+    @State private var isDeletingAccount = false
+    @State private var deleteError: String?
 
     private var totalMiles: Double {
         runStore.history.reduce(0) { $0 + $1.distanceMiles }
@@ -26,6 +31,17 @@ struct ProfileTab: View {
                     } else {
                         guestHeader
                     }
+                }
+
+                if authManager.isSignedIn {
+                    Section("Account") {
+                        Button {
+                            showEditProfile = true
+                        } label: {
+                            Label("Edit Profile", systemImage: "person.crop.circle.badge.plus")
+                                .foregroundStyle(.primary)
+                        }
+                            }
                 }
 
                 Section("Settings") {
@@ -67,12 +83,61 @@ struct ProfileTab: View {
                             }
                         }
                     }
+
+                    Section {
+                        if let error = deleteError {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        }
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if isDeletingAccount {
+                                    ProgressView()
+                                } else {
+                                    Text("Delete Account")
+                                }
+                                Spacer()
+                            }
+                        }
+                        .disabled(isDeletingAccount)
+                    } footer: {
+                        Text("Permanently deletes your account and all run history.")
+                    }
                 }
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Profile")
             .sheet(isPresented: $showAuth) {
                 AuthView()
+            }
+            .confirmationDialog(
+                "Delete Account",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete Account", role: .destructive) {
+                    Task {
+                        isDeletingAccount = true
+                        deleteError = nil
+                        do {
+                            runStore.clearHistory()
+                            try await authManager.deleteAccount()
+                        } catch {
+                            deleteError = error.localizedDescription
+                            isDeletingAccount = false
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This will permanently delete your account and all your run history. This cannot be undone.")
+            }
+            .sheet(isPresented: $showEditProfile) {
+                EditProfileView()
             }
         }
     }
@@ -90,9 +155,10 @@ struct ProfileTab: View {
                     .foregroundStyle(.blue)
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text(authManager.currentUser?.email ?? "Runner")
+                Text(authManager.displayName?.isEmpty == false ? authManager.displayName! : "Set your name")
                     .font(.headline)
                     .lineLimit(1)
+                    .foregroundStyle(authManager.displayName?.isEmpty == false ? .primary : .secondary)
                 Text("\(totalRuns) runs · \(String(format: "%.1f", totalMiles)) mi total")
                     .font(.caption)
                     .foregroundStyle(.secondary)

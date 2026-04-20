@@ -21,6 +21,11 @@ struct FullHistoryView: View {
                     HistoryRunRow(run: run)
                 }
             }
+            .onDelete { indexSet in
+                for index in indexSet {
+                    runStore.deleteRun(id: runStore.history[index].id)
+                }
+            }
         }
         .listStyle(.insetGrouped)
         .navigationTitle("History")

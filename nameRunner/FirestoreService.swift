@@ -40,6 +40,23 @@ struct FirestoreService {
         return snapshot.documents.compactMap(makeRun)
     }
 
+    static func deleteUserData(uid: String) async throws {
+        let runsSnapshot = try await db
+            .collection("users").document(uid)
+            .collection("runs").getDocuments()
+        for doc in runsSnapshot.documents {
+            try await doc.reference.delete()
+        }
+        try await db.collection("users").document(uid).delete()
+    }
+
+    static func deleteRun(id: UUID, for uid: String) async throws {
+        try await db
+            .collection("users").document(uid)
+            .collection("runs").document(id.uuidString)
+            .delete()
+    }
+
     private static func makeRun(from doc: QueryDocumentSnapshot) -> CompletedRun? {
         let d = doc.data()
         guard
