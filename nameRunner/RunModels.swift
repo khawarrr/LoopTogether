@@ -268,7 +268,12 @@ final class RunStore {
         }
 
         if let uid = authManager.currentUser?.uid {
-            Task { try? await FirestoreService.saveRun(completed, for: uid) }
+            let miles = completed.distanceMiles
+            let name = authManager.displayName ?? "Runner"
+            Task {
+                try? await FirestoreService.saveRun(completed, for: uid)
+                try? await FriendsService.updateUserStats(uid: uid, displayName: name, addedMiles: miles)
+            }
         }
     }
 }

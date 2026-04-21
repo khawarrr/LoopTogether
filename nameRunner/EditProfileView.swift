@@ -5,6 +5,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import PhotosUI
 
 enum Gender: String, CaseIterable, Identifiable {
     case preferNotToSay = "Prefer not to say"
@@ -15,6 +16,7 @@ enum Gender: String, CaseIterable, Identifiable {
 
 struct EditProfileView: View {
     @Environment(AuthManager.self) private var authManager
+    @Environment(ProfileImageManager.self) private var imageManager
     @Environment(\.dismiss) private var dismiss
 
     @AppStorage("userGender") private var gender: String = Gender.preferNotToSay.rawValue
@@ -25,10 +27,30 @@ struct EditProfileView: View {
     @State private var confirmPassword = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var photoItem: PhotosPickerItem?
 
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    HStack {
+                        Spacer()
+                        PhotosPicker(selection: $photoItem, matching: .images) {
+                            ZStack(alignment: .bottomTrailing) {
+                                profileCircle
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(.blue)
+                                    .background(Color(uiColor: .systemBackground), in: Circle())
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                    .listRowBackground(Color.clear)
+                }
+
                 Section("Display Name") {
                     TextField("Enter your name", text: $displayName)
                         .autocapitalization(.words)
@@ -94,7 +116,33 @@ struct EditProfileView: View {
             .onAppear {
                 displayName = authManager.displayName ?? ""
             }
+            .onChange(of: photoItem) { _, item in
+                guard let item else { return }
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        imageManager.save(image)
+                    }
+                }
+            }
         }
+    }
+
+    private var profileCircle: some View {
+        Group {
+            if let img = imageManager.profileImage {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "person.crop.circle.fill")
+                    .resizable()
+                    .foregroundStyle(.blue)
+            }
+        }
+        .frame(width: 80, height: 80)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(Color.blue.opacity(0.3), lineWidth: 2))
     }
 
     private func save() async {

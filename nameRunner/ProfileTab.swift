@@ -9,6 +9,7 @@ import FirebaseAuth
 struct ProfileTab: View {
     @Environment(RunStore.self) private var runStore
     @Environment(AuthManager.self) private var authManager
+    @Environment(ProfileImageManager.self) private var imageManager
 
     @State private var showAuth = false
     @State private var showEditProfile = false
@@ -146,14 +147,21 @@ struct ProfileTab: View {
 
     private var signedInHeader: some View {
         HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Color.blue.opacity(0.15))
-                    .frame(width: 60, height: 60)
-                Image(systemName: "person.crop.circle.fill")
-                    .font(.system(size: 40))
-                    .foregroundStyle(.blue)
+            Group {
+                if let img = imageManager.profileImage {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .foregroundStyle(.blue)
+                        .padding(10)
+                        .background(Color.blue.opacity(0.15), in: Circle())
+                }
             }
+            .frame(width: 60, height: 60)
+            .clipShape(Circle())
             VStack(alignment: .leading, spacing: 4) {
                 Text(authManager.displayName?.isEmpty == false ? authManager.displayName! : "Set your name")
                     .font(.headline)
@@ -212,4 +220,5 @@ private struct PlaceholderSettings: View {
     ProfileTab()
         .environment(RunStore(authManager: auth))
         .environment(auth)
+        .environment(ProfileImageManager())
 }

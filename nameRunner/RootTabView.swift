@@ -35,6 +35,11 @@ struct RootTabView: View {
                     Label("Activities", systemImage: "list.bullet")
                 }
 
+            FriendsTab()
+                .tabItem {
+                    Label("Friends", systemImage: "person.2.fill")
+                }
+
             AchievementsTab()
                 .tabItem {
                     Label("Achievements", systemImage: "medal.fill")

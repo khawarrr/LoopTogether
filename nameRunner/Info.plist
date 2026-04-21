@@ -5,8 +5,6 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-			<key></key>
-			<string></string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
@@ -14,19 +12,6 @@
 				<string>com.googleusercontent.apps.388750021990-7r1im1dn9vmk9m5rphhen46hljppeaot</string>
 			</array>
 		</dict>
-	</array>
-	<key>NSServices</key>
-	<array>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string></string>
-			<key>NSMenuItem</key>
-			<dict/>
-		</dict>
-	</array>
-	<key>UTExportedTypeDeclarations</key>
-	<array>
-		<dict/>
 	</array>
 </dict>
 </plist>

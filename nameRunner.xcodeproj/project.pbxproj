@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D5B6A6E42F970447007C7872 /* LoopTogetherWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D5B881E82F960C3D004EC7EC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D5B881E72F960C3D004EC7EC /* FirebaseAuth */; };
 		D5B881EA2F960C3D004EC7EC /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D5B881E92F960C3D004EC7EC /* FirebaseCore */; };
 		D5B881EC2F960C3D004EC7EC /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D5B881EB2F960C3D004EC7EC /* FirebaseFirestore */; };
@@ -14,7 +15,32 @@
 		D5B881F32F961498004EC7EC /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D5B881F22F961498004EC7EC /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		D5B6A6E22F970447007C7872 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D5E427752F94654D0009EA12 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D5B6A6D92F970445007C7872;
+			remoteInfo = "LoopTogetherWatch Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D5B6A6E52F970447007C7872 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				D5B6A6E42F970447007C7872 /* LoopTogetherWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LoopTogetherWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5E4277D2F94654D0009EA12 /* nameRunner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nameRunner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -29,6 +55,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		D5B6A6DB2F970445007C7872 /* LoopTogetherWatch Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "LoopTogetherWatch Watch App";
+			sourceTree = "<group>";
+		};
 		D5E4277F2F94654D0009EA12 /* nameRunner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -40,6 +71,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D5B6A6D72F970445007C7872 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5E4277A2F94654D0009EA12 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -59,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				D5E4277F2F94654D0009EA12 /* nameRunner */,
+				D5B6A6DB2F970445007C7872 /* LoopTogetherWatch Watch App */,
 				D5E4277E2F94654D0009EA12 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				D5E4277D2F94654D0009EA12 /* nameRunner.app */,
+				D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,6 +114,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		D5B6A6D92F970445007C7872 /* LoopTogetherWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D5B6A6E82F970447007C7872 /* Build configuration list for PBXNativeTarget "LoopTogetherWatch Watch App" */;
+			buildPhases = (
+				D5B6A6D62F970445007C7872 /* Sources */,
+				D5B6A6D72F970445007C7872 /* Frameworks */,
+				D5B6A6D82F970445007C7872 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D5B6A6DB2F970445007C7872 /* LoopTogetherWatch Watch App */,
+			);
+			name = "LoopTogetherWatch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "LoopTogetherWatch Watch App";
+			productReference = D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 		D5E4277C2F94654D0009EA12 /* nameRunner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D5E427882F94654E0009EA12 /* Build configuration list for PBXNativeTarget "nameRunner" */;
@@ -81,10 +143,12 @@
 				D5E427792F94654D0009EA12 /* Sources */,
 				D5E4277A2F94654D0009EA12 /* Frameworks */,
 				D5E4277B2F94654D0009EA12 /* Resources */,
+				D5B6A6E52F970447007C7872 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				D5B6A6E32F970447007C7872 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				D5E4277F2F94654D0009EA12 /* nameRunner */,
@@ -111,6 +175,9 @@
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
+					D5B6A6D92F970445007C7872 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
 					D5E4277C2F94654D0009EA12 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
@@ -135,11 +202,19 @@
 			projectRoot = "";
 			targets = (
 				D5E4277C2F94654D0009EA12 /* nameRunner */,
+				D5B6A6D92F970445007C7872 /* LoopTogetherWatch Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D5B6A6D82F970445007C7872 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5E4277B2F94654D0009EA12 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -150,6 +225,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D5B6A6D62F970445007C7872 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5E427792F94654D0009EA12 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -159,7 +241,90 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		D5B6A6E32F970447007C7872 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D5B6A6D92F970445007C7872 /* LoopTogetherWatch Watch App */;
+			targetProxy = D5B6A6E22F970447007C7872 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		D5B6A6E62F970447007C7872 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "LoopTogetherWatch Watch App/LoopTogetherWatch Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XYL5CEK26;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = LoopTogetherWatch;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "LoopTogether reads your health data during runs. ";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "LoopTogether saves your workout data to Health.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "LoopTogether uses your location to track your run route.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.nameRunner;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Debug;
+		};
+		D5B6A6E72F970447007C7872 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "LoopTogetherWatch Watch App/LoopTogetherWatch Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XYL5CEK26;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = LoopTogetherWatch;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "LoopTogether reads your health data during runs. ";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "LoopTogether saves your workout data to Health.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "LoopTogether uses your location to track your run route.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.nameRunner;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Release;
+		};
 		D5E427862F94654E0009EA12 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -279,6 +444,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = nameRunner/nameRunner.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4XYL5CEK26;
@@ -290,7 +456,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = LoopTogether;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSGKFriendListUsageDescription = "";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "name​Runner needs your location to center running routes around where you are.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "nameRunner reads your step count to show daily progress.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "LoopTogether needs your location to center running routes around where you are.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "name​Runner needs your location to center running routes around where you are.\nname​Runner needs your location to center running routes around where you are.\n";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -329,6 +496,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = nameRunner/nameRunner.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4XYL5CEK26;
@@ -340,7 +508,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = LoopTogether;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSGKFriendListUsageDescription = "";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "name​Runner needs your location to center running routes around where you are.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "nameRunner reads your step count to show daily progress.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "LoopTogether needs your location to center running routes around where you are.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "name​Runner needs your location to center running routes around where you are.\nname​Runner needs your location to center running routes around where you are.\n";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -377,6 +546,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D5B6A6E82F970447007C7872 /* Build configuration list for PBXNativeTarget "LoopTogetherWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D5B6A6E62F970447007C7872 /* Debug */,
+				D5B6A6E72F970447007C7872 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D5E427782F94654D0009EA12 /* Build configuration list for PBXProject "nameRunner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

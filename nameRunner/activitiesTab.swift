@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+internal import HealthKit
 
 struct ActivitiesTab: View {
     @Environment(RunStore.self) private var runStore
@@ -14,6 +15,7 @@ struct ActivitiesTab: View {
     @State private var showNewRun = false
     @State private var showActiveRunDetail = false
     @State private var showAuth = false
+    @State private var stepManager = StepCountManager()
 
     private let historyPreviewCount = 3
 
@@ -21,6 +23,7 @@ struct ActivitiesTab: View {
         NavigationStack {
             List {
                 activeRunSection
+                stepsSection
                 historySection
             }
             .listStyle(.insetGrouped)
@@ -67,6 +70,16 @@ struct ActivitiesTab: View {
     }
 
     // MARK: - Sections
+
+    @ViewBuilder
+    private var stepsSection: some View {
+        Section("Steps Today") {
+            StepsTodayCard(manager: stepManager)
+        }
+        .onAppear {
+            Task { await stepManager.requestAuthAndLoad() }
+        }
+    }
 
     @ViewBuilder
     private var activeRunSection: some View {
@@ -145,7 +158,7 @@ struct ActivitiesTab: View {
             }
         } header: {
             HStack {
-                Text("History")
+                Text("Runs History")
                 Spacer()
                 if authManager.isSignedIn, runStore.history.count > historyPreviewCount {
                     NavigationLink {
@@ -157,6 +170,74 @@ struct ActivitiesTab: View {
                     }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Steps today card
+
+struct StepsTodayCard: View {
+    let manager: StepCountManager
+
+    private let goal = 10_000
+    private var progress: Double { min(Double(manager.stepsToday) / Double(goal), 1.0) }
+    private var progressColor: Color {
+        switch progress {
+        case ..<0.4: return .orange
+        case ..<0.8: return .blue
+        default: return .green
+        }
+    }
+
+    var body: some View {
+        if !StepCountManager.isHealthAvailable {
+            Label("Health not available on this device.", systemImage: "heart.slash")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else {
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.secondary.opacity(0.15), lineWidth: 7)
+                        .frame(width: 56, height: 56)
+                    Circle()
+                        .trim(from: 0, to: progress)
+                        .stroke(progressColor, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                        .frame(width: 56, height: 56)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.easeOut(duration: 0.6), value: progress)
+                    if manager.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                    } else {
+                        Image(systemName: "shoeprints.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(progressColor)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(manager.isLoading ? "—" : "\(manager.stepsToday.formatted()) steps")
+                        .font(.title3.bold())
+                        .monospacedDigit()
+                    Text("Goal: \(goal.formatted()) steps")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if !manager.isLoading && manager.stepsToday >= goal {
+                        Text("Goal reached!")
+                            .font(.caption.bold())
+                            .foregroundStyle(.green)
+                    }
+                }
+
+                Spacer()
+
+                Text("\(Int(progress * 100))%")
+                    .font(.caption.bold())
+                    .foregroundStyle(progressColor)
+                    .monospacedDigit()
+            }
+            .padding(.vertical, 4)
         }
     }
 }
