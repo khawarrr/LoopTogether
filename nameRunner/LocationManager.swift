@@ -20,11 +20,21 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.pausesLocationUpdatesAutomatically = false
+        manager.distanceFilter = kCLDistanceFilterNone
         authorizationStatus = manager.authorizationStatus
     }
 
     func requestPermission() {
         manager.requestWhenInUseAuthorization()
+    }
+
+    func startBackgroundLocationUpdates() {
+        manager.allowsBackgroundLocationUpdates = true
+    }
+
+    func stopBackgroundLocationUpdates() {
+        manager.allowsBackgroundLocationUpdates = false
     }
 
     func startHeadingUpdates() {

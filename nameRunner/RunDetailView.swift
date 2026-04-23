@@ -51,7 +51,9 @@ struct RunDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            mapOrPlaceholder
+            if !run.isWalk {
+                mapOrPlaceholder
+            }
             statsCard
         }
         .navigationTitle(titleText)
@@ -60,7 +62,9 @@ struct RunDetailView: View {
 
     private var titleText: String {
         let date = Self.dateFormatter.string(from: run.date)
-        return run.isFreeRun ? "Free Run · \(date)" : date
+        return run.isWalk ? "\(run.workoutType) · \(date)"
+             : run.isFreeRun ? "Free Run · \(date)"
+             : "Route Run · \(date)"
     }
 
     // MARK: - Map / placeholder

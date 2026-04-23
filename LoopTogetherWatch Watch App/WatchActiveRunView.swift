@@ -46,6 +46,15 @@ struct WatchActiveRunView: View {
                 statView(value: pace > 0 ? paceString(pace) : "--:--", label: "pace")
             }
 
+            // Heart rate + Calories row (Watch-only)
+            if isWatchRun {
+                HStack(spacing: 14) {
+                    heartRateView
+                    Divider().frame(height: 32)
+                    caloriesView
+                }
+            }
+
             // Turn instruction (route runs only)
             if isWatchRun && workout.isRouteRun && !workout.currentInstruction.isEmpty {
                 Text(workout.currentInstruction)
@@ -54,18 +63,6 @@ struct WatchActiveRunView: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .padding(.horizontal, 2)
-            }
-
-            // Heart rate (Watch-only)
-            if isWatchRun && workout.heartRate > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(.red)
-                        .font(.caption)
-                    Text("\(Int(workout.heartRate)) bpm")
-                        .font(.caption.bold())
-                        .foregroundStyle(.red)
-                }
             }
 
             // Controls
@@ -117,6 +114,35 @@ struct WatchActiveRunView: View {
             }
         } else {
             session.sendAction("end")
+        }
+    }
+
+    private var heartRateView: some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 3) {
+                Image(systemName: "heart.fill")
+                    .foregroundColor(.red)
+                    .font(.system(size: 10))
+                Text(workout.heartRate > 0 ? "\(Int(workout.heartRate))" : "--")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(.red)
+                    .monospacedDigit()
+            }
+            Text("bpm")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var caloriesView: some View {
+        let kcal = workout.calories > 0 ? workout.calories : (workout.distanceMeters / 1609.34) * 62
+        return VStack(spacing: 2) {
+            Text(kcal > 0 ? "\(Int(kcal))" : "--")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .monospacedDigit()
+            Text("kcal")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
     }
 

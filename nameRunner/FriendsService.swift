@@ -20,27 +20,37 @@ struct FriendsService {
     static func updateUserStats(uid: String, displayName: String, addedMiles: Double) async throws {
         let ref = db.collection("users").document(uid)
         let weekStart = currentWeekStart()
+        let dayStart = currentDayStart()
 
         let doc = try await ref.getDocument()
-        let storedWeekStart = (doc.data()?["weekStart"] as? Timestamp)?.dateValue()
-        let currentWeekly = doc.data()?["weeklyMiles"] as? Double ?? 0
+        let data = doc.data() ?? [:]
 
-        let isNewWeek: Bool
-        if let stored = storedWeekStart {
-            isNewWeek = stored < weekStart
-        } else {
-            isNewWeek = true
-        }
-
+        let storedWeekStart = (data["weekStart"] as? Timestamp)?.dateValue()
+        let isNewWeek = storedWeekStart.map { $0 < weekStart } ?? true
+        let currentWeekly = data["weeklyMiles"] as? Double ?? 0
         let newWeeklyMiles = isNewWeek ? addedMiles : currentWeekly + addedMiles
+
+        let storedDayStart = (data["dayStart"] as? Timestamp)?.dateValue()
+        let isNewDay = storedDayStart.map { $0 < dayStart } ?? true
+        let currentDaily = data["dailyMiles"] as? Double ?? 0
+        let newDailyMiles = isNewDay ? addedMiles : currentDaily + addedMiles
 
         try await ref.setData([
             "displayName": displayName,
             "weeklyMiles": newWeeklyMiles,
             "weekStart": Timestamp(date: weekStart),
+            "dailyMiles": newDailyMiles,
+            "dayStart": Timestamp(date: dayStart),
             "totalMiles": FieldValue.increment(addedMiles),
             "totalRuns": FieldValue.increment(Int64(1))
         ], merge: true)
+    }
+
+    static func syncDailySteps(uid: String, steps: Int) async throws {
+        try await db.collection("users").document(uid).setData(
+            ["dailySteps": steps, "dayStart": Timestamp(date: currentDayStart())],
+            merge: true
+        )
     }
 
     static func getUserProfile(uid: String) async throws -> UserProfile? {
@@ -60,10 +70,15 @@ struct FriendsService {
 
     private static func makeProfile(from doc: DocumentSnapshot) -> UserProfile? {
         guard doc.exists, let data = doc.data() else { return nil }
+        let dayStart = currentDayStart()
+        let storedDay = (data["dayStart"] as? Timestamp)?.dateValue()
+        let isToday = storedDay.map { Calendar.current.isDate($0, inSameDayAs: dayStart) } ?? false
         return UserProfile(
             id: doc.documentID,
             displayName: data["displayName"] as? String ?? "Runner",
             weeklyMiles: data["weeklyMiles"] as? Double ?? 0,
+            dailyMiles: isToday ? (data["dailyMiles"] as? Double ?? 0) : 0,
+            dailySteps: isToday ? (data["dailySteps"] as? Int ?? 0) : 0,
             totalMiles: data["totalMiles"] as? Double ?? 0,
             totalRuns: data["totalRuns"] as? Int ?? 0
         )
@@ -142,6 +157,10 @@ struct FriendsService {
         var cal = Calendar.current
         cal.firstWeekday = 2 // Monday
         return cal.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+    }
+
+    static func currentDayStart() -> Date {
+        Calendar.current.startOfDay(for: Date())
     }
 }
 

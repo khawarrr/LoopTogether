@@ -6,10 +6,28 @@
 import Foundation
 import HealthKit
 import CoreLocation
+import CoreMotion
+
+enum WorkoutMode {
+    case freeRun, outdoorWalk, indoorWalk
+
+    var activityType: HKWorkoutActivityType { self == .freeRun ? .running : .walking }
+    var locationType: HKWorkoutSessionLocationType { self == .indoorWalk ? .indoor : .outdoor }
+    var usesGPS: Bool { self != .indoorWalk }
+    var displayName: String {
+        switch self {
+        case .freeRun:     return "Free Run"
+        case .outdoorWalk: return "Outdoor Walk"
+        case .indoorWalk:  return "Indoor Walk"
+        }
+    }
+}
 
 @Observable
 final class WatchWorkoutManager: NSObject {
     var isActive = false
+    var currentMode: WorkoutMode = .freeRun
+    var lastRun: WatchRunData?
     var isPaused = false
     var elapsedSeconds: Int = 0
     var distanceMeters: Double = 0
@@ -36,6 +54,9 @@ final class WatchWorkoutManager: NSObject {
     private var pausedDuration: TimeInterval = 0
     private var pauseStart: Date?
     private var timerTask: Task<Void, Never>?
+    private var lastLocation: CLLocation?
+    private var heartRateQuery: HKAnchoredObjectQuery?
+    private var pedometer: CMPedometer?
 
     static var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
 
@@ -46,18 +67,19 @@ final class WatchWorkoutManager: NSObject {
             HKQuantityType(.distanceWalkingRunning),
             HKQuantityType(.activeEnergyBurned)
         ]
-        try? await healthStore.requestAuthorization(toShare: types, read: [])
+        try? await healthStore.requestAuthorization(toShare: types, read: types)
     }
 
-    func startRun(route: WatchRoute? = nil) {
+    func startRun(mode: WorkoutMode = .freeRun, route: WatchRoute? = nil) {
+        currentMode = mode
         currentRoute = route
         currentStepIndex = 0
         hasArrivedAtDestination = false
         guard Self.isAvailable else { return }
 
         let config = HKWorkoutConfiguration()
-        config.activityType = .running
-        config.locationType = .outdoor
+        config.activityType = mode.activityType
+        config.locationType = mode.locationType
 
         guard let session = try? HKWorkoutSession(healthStore: healthStore, configuration: config) else { return }
         let builder = session.associatedWorkoutBuilder()
@@ -70,7 +92,7 @@ final class WatchWorkoutManager: NSObject {
         let now = Date()
         sessionStartDate = now
         session.startActivity(with: now)
-        builder.beginCollection(withStart: now) { _, _ in }
+        // beginCollection is called in the delegate once session reaches .running
 
         isActive = true
         isPaused = false
@@ -80,32 +102,79 @@ final class WatchWorkoutManager: NSObject {
         calories = 0
         breadcrumbs = []
         pausedDuration = 0
+        lastLocation = nil
 
-        let lm = CLLocationManager()
-        lm.delegate = self
-        lm.desiredAccuracy = kCLLocationAccuracyBest
-        lm.requestWhenInUseAuthorization()
-        lm.startUpdatingLocation()
-        locationManager = lm
+        if mode.usesGPS {
+            let lm = CLLocationManager()
+            lm.delegate = self
+            lm.desiredAccuracy = kCLLocationAccuracyBest
+            lm.requestWhenInUseAuthorization()
+            lm.startUpdatingLocation()
+            locationManager = lm
+        }
 
         startTimer()
+        startHeartRateObserver()
+        if mode == .indoorWalk { startPedometer(from: now) }
+    }
+
+    private func startHeartRateObserver() {
+        let hrType = HKQuantityType(.heartRate)
+        let predicate = HKQuery.predicateForSamples(withStart: Date(), end: nil)
+        let query = HKAnchoredObjectQuery(
+            type: hrType,
+            predicate: predicate,
+            anchor: nil,
+            limit: HKObjectQueryNoLimit
+        ) { [weak self] _, samples, _, _, _ in
+            self?.handleHeartRateSamples(samples)
+        }
+        query.updateHandler = { [weak self] _, samples, _, _, _ in
+            self?.handleHeartRateSamples(samples)
+        }
+        healthStore.execute(query)
+        heartRateQuery = query
+    }
+
+    private func startPedometer(from date: Date) {
+        guard CMPedometer.isDistanceAvailable() else { return }
+        let base = distanceMeters
+        let p = CMPedometer()
+        p.startUpdates(from: date) { [weak self] data, _ in
+            guard let self, let data else { return }
+            DispatchQueue.main.async {
+                self.distanceMeters = base + (data.distance?.doubleValue ?? 0)
+            }
+        }
+        pedometer = p
+    }
+
+    private func handleHeartRateSamples(_ samples: [HKSample]?) {
+        guard let samples = samples as? [HKQuantitySample], let last = samples.last else { return }
+        let unit = HKUnit.count().unitDivided(by: .minute())
+        let bpm = last.quantity.doubleValue(for: unit)
+        DispatchQueue.main.async { self.heartRate = bpm }
     }
 
     func pauseRun() {
         workoutSession?.pause()
         locationManager?.stopUpdatingLocation()
+        pedometer?.stopUpdates()
         pauseStart = Date()
+        lastLocation = nil
         isPaused = true
         timerTask?.cancel()
     }
 
     func resumeRun() {
         workoutSession?.resume()
+        lastLocation = nil
         locationManager?.startUpdatingLocation()
         if let ps = pauseStart { pausedDuration += Date().timeIntervalSince(ps) }
         pauseStart = nil
         isPaused = false
         startTimer()
+        if currentMode == .indoorWalk { startPedometer(from: Date()) }
     }
 
     func endRun() async -> WatchRunData? {
@@ -118,6 +187,10 @@ final class WatchWorkoutManager: NSObject {
         locationManager?.stopUpdatingLocation()
         locationManager = nil
         timerTask?.cancel()
+        if let q = heartRateQuery { healthStore.stop(q) }
+        heartRateQuery = nil
+        pedometer?.stopUpdates()
+        pedometer = nil
 
         await withCheckedContinuation { cont in
             builder.endCollection(withEnd: endDate) { _, _ in cont.resume() }
@@ -135,9 +208,11 @@ final class WatchWorkoutManager: NSObject {
             distanceMeters: distanceMeters,
             caloriesBurned: effectiveCalories,
             heartRate: heartRate,
-            pathCoordinates: breadcrumbs
+            pathCoordinates: breadcrumbs,
+            workoutType: currentMode.displayName
         )
 
+        lastRun = data
         isActive = false
         isPaused = false
         workoutSession = nil
@@ -169,8 +244,14 @@ final class WatchWorkoutManager: NSObject {
 extension WatchWorkoutManager: HKWorkoutSessionDelegate {
     func workoutSession(_ session: HKWorkoutSession,
                         didChangeTo toState: HKWorkoutSessionState,
-                        from fromState: HKWorkoutSessionState, date: Date) {}
-    func workoutSession(_ session: HKWorkoutSession, didFailWithError error: Error) {}
+                        from fromState: HKWorkoutSessionState, date: Date) {
+        if toState == .running {
+            workoutBuilder?.beginCollection(withStart: date) { _, _ in }
+        }
+    }
+    func workoutSession(_ session: HKWorkoutSession, didFailWithError error: Error) {
+        print("[Workout] Session failed: \(error)")
+    }
 }
 
 // MARK: - HKLiveWorkoutBuilderDelegate
@@ -205,9 +286,18 @@ extension WatchWorkoutManager: HKLiveWorkoutBuilderDelegate {
 extension WatchWorkoutManager: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            for loc in locations where loc.horizontalAccuracy > 0 && loc.horizontalAccuracy < 25 {
-                self.breadcrumbs.append(["lat": loc.coordinate.latitude, "lng": loc.coordinate.longitude])
+            guard let self, !self.isPaused else { return }
+            for loc in locations where loc.horizontalAccuracy > 0 && loc.horizontalAccuracy < 20 {
+                if let prev = self.lastLocation {
+                    let delta = loc.distance(from: prev)
+                    if delta >= 3 {
+                        self.distanceMeters += delta
+                        self.lastLocation = loc
+                        self.breadcrumbs.append(["lat": loc.coordinate.latitude, "lng": loc.coordinate.longitude])
+                    }
+                } else {
+                    self.lastLocation = loc
+                }
                 self.advanceStepIfNeeded(userLocation: loc)
             }
         }

@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		D5B6A6E42F970447007C7872 /* LoopTogetherWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D5B6A7072F987356007C7872 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5B6A7062F987356007C7872 /* WidgetKit.framework */; };
+		D5B6A7092F987356007C7872 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5B6A7082F987356007C7872 /* SwiftUI.framework */; };
+		D5B6A7162F987358007C7872 /* LoopTogetherWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D5B6A7042F987356007C7872 /* LoopTogetherWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D5B881E82F960C3D004EC7EC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D5B881E72F960C3D004EC7EC /* FirebaseAuth */; };
 		D5B881EA2F960C3D004EC7EC /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D5B881E92F960C3D004EC7EC /* FirebaseCore */; };
 		D5B881EC2F960C3D004EC7EC /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D5B881EB2F960C3D004EC7EC /* FirebaseFirestore */; };
@@ -23,6 +26,13 @@
 			remoteGlobalIDString = D5B6A6D92F970445007C7872;
 			remoteInfo = "LoopTogetherWatch Watch App";
 		};
+		D5B6A7142F987358007C7872 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D5E427752F94654D0009EA12 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D5B6A7032F987356007C7872;
+			remoteInfo = LoopTogetherWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,14 +47,35 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5B6A71B2F987358007C7872 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D5B6A7162F987358007C7872 /* LoopTogetherWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LoopTogetherWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5B6A7042F987356007C7872 /* LoopTogetherWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LoopTogetherWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5B6A7062F987356007C7872 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		D5B6A7082F987356007C7872 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		D5E4277D2F94654D0009EA12 /* nameRunner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nameRunner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D5B6A71A2F987358007C7872 /* Exceptions for "LoopTogetherWidget" folder in "LoopTogetherWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D5B6A7032F987356007C7872 /* LoopTogetherWidgetExtension */;
+		};
 		D5E427922F9479FE0009EA12 /* Exceptions for "nameRunner" folder in "nameRunner" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -58,6 +89,14 @@
 		D5B6A6DB2F970445007C7872 /* LoopTogetherWatch Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "LoopTogetherWatch Watch App";
+			sourceTree = "<group>";
+		};
+		D5B6A70A2F987356007C7872 /* LoopTogetherWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D5B6A71A2F987358007C7872 /* Exceptions for "LoopTogetherWidget" folder in "LoopTogetherWidgetExtension" target */,
+			);
+			path = LoopTogetherWidget;
 			sourceTree = "<group>";
 		};
 		D5E4277F2F94654D0009EA12 /* nameRunner */ = {
@@ -78,6 +117,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5B6A7012F987356007C7872 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D5B6A7092F987356007C7872 /* SwiftUI.framework in Frameworks */,
+				D5B6A7072F987356007C7872 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5E4277A2F94654D0009EA12 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -93,11 +141,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D5B6A7052F987356007C7872 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D5B6A7062F987356007C7872 /* WidgetKit.framework */,
+				D5B6A7082F987356007C7872 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D5E427742F94654D0009EA12 = {
 			isa = PBXGroup;
 			children = (
 				D5E4277F2F94654D0009EA12 /* nameRunner */,
 				D5B6A6DB2F970445007C7872 /* LoopTogetherWatch Watch App */,
+				D5B6A70A2F987356007C7872 /* LoopTogetherWidget */,
+				D5B6A7052F987356007C7872 /* Frameworks */,
 				D5E4277E2F94654D0009EA12 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -107,6 +166,7 @@
 			children = (
 				D5E4277D2F94654D0009EA12 /* nameRunner.app */,
 				D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */,
+				D5B6A7042F987356007C7872 /* LoopTogetherWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -136,6 +196,28 @@
 			productReference = D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
+		D5B6A7032F987356007C7872 /* LoopTogetherWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D5B6A7172F987358007C7872 /* Build configuration list for PBXNativeTarget "LoopTogetherWidgetExtension" */;
+			buildPhases = (
+				D5B6A7002F987356007C7872 /* Sources */,
+				D5B6A7012F987356007C7872 /* Frameworks */,
+				D5B6A7022F987356007C7872 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D5B6A70A2F987356007C7872 /* LoopTogetherWidget */,
+			);
+			name = LoopTogetherWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = LoopTogetherWidgetExtension;
+			productReference = D5B6A7042F987356007C7872 /* LoopTogetherWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		D5E4277C2F94654D0009EA12 /* nameRunner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D5E427882F94654E0009EA12 /* Build configuration list for PBXNativeTarget "nameRunner" */;
@@ -144,11 +226,13 @@
 				D5E4277A2F94654D0009EA12 /* Frameworks */,
 				D5E4277B2F94654D0009EA12 /* Resources */,
 				D5B6A6E52F970447007C7872 /* Embed Watch Content */,
+				D5B6A71B2F987358007C7872 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				D5B6A6E32F970447007C7872 /* PBXTargetDependency */,
+				D5B6A7152F987358007C7872 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				D5E4277F2F94654D0009EA12 /* nameRunner */,
@@ -178,6 +262,9 @@
 					D5B6A6D92F970445007C7872 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
+					D5B6A7032F987356007C7872 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
 					D5E4277C2F94654D0009EA12 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
@@ -203,12 +290,20 @@
 			targets = (
 				D5E4277C2F94654D0009EA12 /* nameRunner */,
 				D5B6A6D92F970445007C7872 /* LoopTogetherWatch Watch App */,
+				D5B6A7032F987356007C7872 /* LoopTogetherWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D5B6A6D82F970445007C7872 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5B6A7022F987356007C7872 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -232,6 +327,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5B6A7002F987356007C7872 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5E427792F94654D0009EA12 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -246,6 +348,11 @@
 			isa = PBXTargetDependency;
 			target = D5B6A6D92F970445007C7872 /* LoopTogetherWatch Watch App */;
 			targetProxy = D5B6A6E22F970447007C7872 /* PBXContainerItemProxy */;
+		};
+		D5B6A7152F987358007C7872 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D5B6A7032F987356007C7872 /* LoopTogetherWidgetExtension */;
+			targetProxy = D5B6A7142F987358007C7872 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -265,6 +372,7 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "LoopTogether reads your health data during runs. ";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "LoopTogether saves your workout data to Health.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "LoopTogether uses your location to track your run route.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "LoopTogether uses motion data to track indoor walk \n  distance.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.nameRunner;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -283,7 +391,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 26.4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
@@ -302,6 +410,7 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "LoopTogether reads your health data during runs. ";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "LoopTogether saves your workout data to Health.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "LoopTogether uses your location to track your run route.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "LoopTogether uses motion data to track indoor walk \n  distance.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.nameRunner;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -321,7 +430,72 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 26.4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		D5B6A7182F987358007C7872 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XYL5CEK26;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LoopTogetherWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LoopTogetherWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.LoopTogetherWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D5B6A7192F987358007C7872 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XYL5CEK26;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LoopTogetherWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LoopTogetherWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.LoopTogetherWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -551,6 +725,15 @@
 			buildConfigurations = (
 				D5B6A6E62F970447007C7872 /* Debug */,
 				D5B6A6E72F970447007C7872 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D5B6A7172F987358007C7872 /* Build configuration list for PBXNativeTarget "LoopTogetherWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D5B6A7182F987358007C7872 /* Debug */,
+				D5B6A7192F987358007C7872 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

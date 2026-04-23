@@ -14,6 +14,7 @@ struct WatchRunData {
     let caloriesBurned: Double
     let heartRate: Double
     let pathCoordinates: [[String: Double]]   // [{lat, lng}]
+    let workoutType: String
 
     func toDictionary() -> [String: Any] {
         [
@@ -23,7 +24,8 @@ struct WatchRunData {
             "distanceMeters": distanceMeters,
             "caloriesBurned": caloriesBurned,
             "heartRate": heartRate,
-            "pathCoordinates": pathCoordinates
+            "pathCoordinates": pathCoordinates,
+            "workoutType": workoutType
         ]
     }
 
@@ -39,7 +41,8 @@ struct WatchRunData {
             distanceMeters:   distance,
             caloriesBurned:   dict["caloriesBurned"]   as? Double             ?? 0,
             heartRate:        dict["heartRate"]         as? Double             ?? 0,
-            pathCoordinates:  dict["pathCoordinates"]   as? [[String: Double]] ?? []
+            pathCoordinates:  dict["pathCoordinates"]   as? [[String: Double]] ?? [],
+            workoutType:      dict["workoutType"]        as? String             ?? "Free Run"
         )
     }
 }

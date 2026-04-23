@@ -88,10 +88,14 @@ final class RunSession: Identifiable {
 
         // Accuracy filter: skip noisy or invalid readings.
         guard userLocation.horizontalAccuracy > 0,
-              userLocation.horizontalAccuracy < 25 else { return }
+              userLocation.horizontalAccuracy < 20 else { return }
 
-        // Skip stale readings (e.g., cached location from before auth).
-        guard userLocation.timestamp.timeIntervalSinceNow > -30 else { return }
+        // Skip stale readings — tighter window catches batched background updates.
+        guard userLocation.timestamp.timeIntervalSinceNow > -8 else { return }
+
+        // Speed filter: reject locations implying faster than ~25 mph (sprinter max).
+        // CLLocation.speed is -1 when unavailable, so only apply when valid.
+        if userLocation.speed >= 0, userLocation.speed > 11 { return }
 
         if let lastCoord = breadcrumbs.last {
             let lastLoc = CLLocation(latitude: lastCoord.latitude, longitude: lastCoord.longitude)
@@ -166,7 +170,11 @@ struct CompletedRun: Identifiable {
     /// The finish-line location for route-based runs.
     let destination: CLLocationCoordinate2D?
 
+    /// Activity type label: "Free Run", "Route Run", "Outdoor Walk", "Indoor Walk"
+    var workoutType: String
+
     var isFreeRun: Bool { plannedRouteCoordinates == nil }
+    var isWalk: Bool { workoutType.contains("Walk") }
 
     /// Coordinates to display on the map. Prefers actual GPS track; if none
     /// was recorded, falls back to the planned route (for route-based runs).
@@ -257,7 +265,8 @@ final class RunStore {
             caloriesBurned: session.caloriesBurned,
             pathCoordinates: session.breadcrumbs,
             plannedRouteCoordinates: session.route?.polyline.coordinates,
-            destination: session.destination
+            destination: session.destination,
+            workoutType: session.isFreeRun ? "Free Run" : "Route Run"
         )
         history.insert(completed, at: 0)
         lastCompletedRun = completed

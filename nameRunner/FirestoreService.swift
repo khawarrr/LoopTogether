@@ -17,7 +17,8 @@ struct FirestoreService {
             "durationSeconds": run.durationSeconds,
             "distanceMeters": run.distanceMeters,
             "caloriesBurned": run.caloriesBurned,
-            "pathCoordinates": run.pathCoordinates.map { ["lat": $0.latitude, "lng": $0.longitude] }
+            "pathCoordinates": run.pathCoordinates.map { ["lat": $0.latitude, "lng": $0.longitude] },
+            "workoutType": run.workoutType
         ]
         if let planned = run.plannedRouteCoordinates {
             data["plannedRouteCoordinates"] = planned.map { ["lat": $0.latitude, "lng": $0.longitude] }
@@ -95,7 +96,8 @@ struct FirestoreService {
             caloriesBurned: calories,
             pathCoordinates: coords("pathCoordinates"),
             plannedRouteCoordinates: planned,
-            destination: destination
+            destination: destination,
+            workoutType: d["workoutType"] as? String ?? "Free Run"
         )
     }
 }

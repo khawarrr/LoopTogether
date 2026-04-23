@@ -10,6 +10,9 @@ struct FriendsTab: View {
     @Environment(AuthManager.self) private var authManager
     @State private var friendsManager = FriendsManager()
     @State private var showAddFriend = false
+    @State private var selectedPeriod: LeaderboardPeriod = .weekly
+
+    enum LeaderboardPeriod { case daily, weekly }
 
     var body: some View {
         NavigationStack {
@@ -76,18 +79,25 @@ struct FriendsTab: View {
                 }
             }
 
-            Section("Weekly Leaderboard") {
+            Section {
+                Picker("Period", selection: $selectedPeriod) {
+                    Text("Daily").tag(LeaderboardPeriod.daily)
+                    Text("Weekly").tag(LeaderboardPeriod.weekly)
+                }
+                .pickerStyle(.segmented)
+                .listRowBackground(Color.clear)
+                .listRowInsets(.init())
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
+
+                let entries = selectedPeriod == .weekly ? friendsManager.weeklyLeaderboard : friendsManager.dailyLeaderboard
                 if friendsManager.isLoading {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
-                } else if friendsManager.leaderboard.isEmpty {
+                    HStack { Spacer(); ProgressView(); Spacer() }
+                } else if entries.isEmpty {
                     emptyLeaderboard
                 } else {
-                    ForEach(friendsManager.leaderboard) { entry in
-                        LeaderboardRow(entry: entry)
+                    ForEach(entries) { entry in
+                        LeaderboardRow(entry: entry, period: selectedPeriod)
                             .swipeActions(edge: .trailing) {
                                 if !entry.isMe {
                                     Button(role: .destructive) {
@@ -100,6 +110,8 @@ struct FriendsTab: View {
                             }
                     }
                 }
+            } header: {
+                Text(selectedPeriod == .weekly ? "Weekly Leaderboard" : "Daily Leaderboard")
             }
 
             if let error = friendsManager.errorMessage {
@@ -149,6 +161,7 @@ struct FriendsTab: View {
 
 private struct LeaderboardRow: View {
     let entry: LeaderboardEntry
+    let period: FriendsTab.LeaderboardPeriod
 
     private var medal: String? {
         switch entry.rank {
@@ -162,8 +175,7 @@ private struct LeaderboardRow: View {
     var body: some View {
         HStack(spacing: 12) {
             if let m = medal {
-                Text(m)
-                    .font(.title2)
+                Text(m).font(.title2)
             } else {
                 Text("\(entry.rank)")
                     .font(.headline)
@@ -186,12 +198,25 @@ private struct LeaderboardRow: View {
                             .foregroundStyle(.blue)
                     }
                 }
-                Text(String(format: "%.1f mi this week", entry.weeklyMiles))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if period == .weekly {
+                    Text(String(format: "%.1f mi this week", entry.weeklyMiles))
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    Text(String(format: "%.1f mi today", entry.dailyMiles))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
             }
 
             Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(entry.dailySteps.formatted())
+                    .font(.subheadline.bold())
+                    .monospacedDigit()
+                Text("steps")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.vertical, 2)
         .listRowBackground(entry.isMe ? Color.blue.opacity(0.05) : nil)

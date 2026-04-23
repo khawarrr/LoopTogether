@@ -74,7 +74,8 @@ final class PhoneSessionManager: NSObject {
             caloriesBurned: data.caloriesBurned,
             pathCoordinates: coords,
             plannedRouteCoordinates: nil,
-            destination: nil
+            destination: nil,
+            workoutType: data.workoutType
         )
         store.history.insert(run, at: 0)
         store.lastCompletedRun = run

@@ -13,6 +13,10 @@ struct ContentView: View {
         Group {
             if workout.isActive {
                 WatchActiveRunView(isWatchRun: true)
+            } else if let summary = workout.lastRun {
+                WatchRunSummaryView(data: summary) {
+                    workout.lastRun = nil
+                }
             } else if session.phoneIsActive {
                 WatchActiveRunView(isWatchRun: false)
             } else {
@@ -25,32 +29,50 @@ struct ContentView: View {
     @State private var showRoutePicker = false
 
     private var idleView: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "figure.run")
-                .font(.system(size: 34))
-                .foregroundStyle(.blue)
+        ScrollView {
+            VStack(spacing: 8) {
+                Image(systemName: "figure.run")
+                    .font(.system(size: 28))
+                    .foregroundStyle(.blue)
 
-            Text("LoopTogether")
-                .font(.headline)
+                Text("LoopTogether")
+                    .font(.headline)
 
-            Button("Free Run") {
-                workout.startRun()
-                session.sendAction("watchStartedRun")
+                Button("Free Run") {
+                    workout.startRun(mode: .freeRun)
+                    session.sendAction("watchStartedRun")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.blue)
+
+                Button("Generate Route") {
+                    showRoutePicker = true
+                }
+                .buttonStyle(.bordered)
+                .tint(.green)
+
+                HStack(spacing: 6) {
+                    Button("Outdoor Walk") {
+                        workout.startRun(mode: .outdoorWalk)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.teal)
+
+                    Button("Indoor Walk") {
+                        workout.startRun(mode: .indoorWalk)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                }
+                .font(.system(size: 13))
+
+                if session.phoneIsActive {
+                    Text("iPhone run active")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.blue)
-
-            Button("Generate Route") {
-                showRoutePicker = true
-            }
-            .buttonStyle(.bordered)
-            .tint(.green)
-
-            if session.phoneIsActive {
-                Text("iPhone run active")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            .padding(.vertical, 4)
         }
         .sheet(isPresented: $showRoutePicker) {
             WatchRoutePickerView()

@@ -7,33 +7,42 @@ import Foundation
 
 @Observable
 final class FriendsManager {
-    var leaderboard: [LeaderboardEntry] = []
+    var weeklyLeaderboard: [LeaderboardEntry] = []
+    var dailyLeaderboard: [LeaderboardEntry] = []
     var pendingRequests: [FriendRequest] = []
     var isLoading = false
     var errorMessage: String?
+
+    var leaderboard: [LeaderboardEntry] { weeklyLeaderboard }
 
     func load(uid: String, myName: String) async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
         do {
-            async let friendIDs   = FriendsService.getFriendIDs(uid: uid)
-            async let requests    = FriendsService.getIncomingRequests(uid: uid)
-            async let myProfile   = FriendsService.getUserProfile(uid: uid)
+            async let friendIDs = FriendsService.getFriendIDs(uid: uid)
+            async let requests  = FriendsService.getIncomingRequests(uid: uid)
+            async let myProfile = FriendsService.getUserProfile(uid: uid)
 
             let (ids, reqs, me) = try await (friendIDs, requests, myProfile)
             pendingRequests = reqs
 
             var profiles = try await FriendsService.getFriendProfiles(uids: ids)
-            // Always include self in leaderboard, using local profile if Firestore not yet written
-            let selfProfile = me ?? UserProfile(id: uid, displayName: myName, weeklyMiles: 0, totalMiles: 0, totalRuns: 0)
+            let selfProfile = me ?? UserProfile(id: uid, displayName: myName, weeklyMiles: 0, dailyMiles: 0, dailySteps: 0, totalMiles: 0, totalRuns: 0)
             profiles.append(selfProfile)
 
-            leaderboard = profiles
+            weeklyLeaderboard = profiles
                 .sorted { $0.weeklyMiles > $1.weeklyMiles }
                 .enumerated()
                 .map { idx, p in
-                    LeaderboardEntry(id: p.id, displayName: p.displayName, weeklyMiles: p.weeklyMiles, isMe: p.id == uid, rank: idx + 1)
+                    LeaderboardEntry(id: p.id, displayName: p.displayName, weeklyMiles: p.weeklyMiles, dailyMiles: p.dailyMiles, dailySteps: p.dailySteps, isMe: p.id == uid, rank: idx + 1)
+                }
+
+            dailyLeaderboard = profiles
+                .sorted { $0.dailySteps > $1.dailySteps }
+                .enumerated()
+                .map { idx, p in
+                    LeaderboardEntry(id: p.id, displayName: p.displayName, weeklyMiles: p.weeklyMiles, dailyMiles: p.dailyMiles, dailySteps: p.dailySteps, isMe: p.id == uid, rank: idx + 1)
                 }
         } catch {
             errorMessage = error.localizedDescription
@@ -57,6 +66,7 @@ final class FriendsManager {
 
     func removeFriend(uid: String, friendUID: String) async throws {
         try await FriendsService.removeFriend(uid: uid, friendUID: friendUID)
-        leaderboard.removeAll { $0.id == friendUID }
+        weeklyLeaderboard.removeAll { $0.id == friendUID }
+        dailyLeaderboard.removeAll { $0.id == friendUID }
     }
 }

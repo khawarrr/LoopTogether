@@ -7,6 +7,7 @@
 
 import SwiftUI
 internal import HealthKit
+import FirebaseAuth
 
 struct ActivitiesTab: View {
     @Environment(RunStore.self) private var runStore
@@ -77,7 +78,16 @@ struct ActivitiesTab: View {
             StepsTodayCard(manager: stepManager)
         }
         .onAppear {
-            Task { await stepManager.requestAuthAndLoad() }
+            Task {
+                await stepManager.requestAuthAndLoad()
+                if let uid = authManager.currentUser?.uid, stepManager.stepsToday > 0 {
+                    try? await FriendsService.syncDailySteps(uid: uid, steps: stepManager.stepsToday)
+                }
+            }
+        }
+        .onChange(of: stepManager.stepsToday) { _, steps in
+            guard steps > 0, let uid = authManager.currentUser?.uid else { return }
+            Task { try? await FriendsService.syncDailySteps(uid: uid, steps: steps) }
         }
     }
 

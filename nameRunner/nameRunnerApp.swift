@@ -7,6 +7,7 @@ import SwiftUI
 import FirebaseCore
 import GoogleSignIn
 import FirebaseAuth
+internal import _LocationEssentials
 
 @main
 struct nameRunnerApp: App {
@@ -15,6 +16,7 @@ struct nameRunnerApp: App {
     @State private var locationManager: LocationManager
     @State private var phoneSession: PhoneSessionManager
     @State private var profileImageManager = ProfileImageManager()
+    @State private var activityManager = RunActivityManager()
 
     init() {
         FirebaseApp.configure()
@@ -43,6 +45,26 @@ struct nameRunnerApp: App {
                     if authManager.isSignedIn {
                         runStore.loadHistory()
                     }
+                }
+                .onChange(of: runStore.activeSession?.id) { _, id in
+                    if let session = runStore.activeSession {
+                        locationManager.startBackgroundLocationUpdates()
+                        activityManager.start(
+                            runType: session.isFreeRun ? "Free Run" : "Route Run",
+                            startDate: session.startedAt
+                        )
+                    } else {
+                        locationManager.stopBackgroundLocationUpdates()
+                        activityManager.end()
+                    }
+                }
+                .onChange(of: locationManager.currentLocation?.timestamp) { _, _ in
+                    guard let session = runStore.activeSession else { return }
+                    activityManager.update(
+                        distanceMiles: session.distanceCoveredMiles,
+                        paceMinPerMile: session.paceMinutesPerMile ?? 0,
+                        isPaused: session.isPaused
+                    )
                 }
                 .onChange(of: authManager.currentUser?.uid) { _, uid in
                     if let uid {
