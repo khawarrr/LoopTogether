@@ -10,6 +10,7 @@ struct ProfileTab: View {
     @Environment(RunStore.self) private var runStore
     @Environment(AuthManager.self) private var authManager
     @Environment(ProfileImageManager.self) private var imageManager
+    @Environment(AppSettings.self) private var settings
 
     @State private var showAuth = false
     @State private var showEditProfile = false
@@ -47,7 +48,7 @@ struct ProfileTab: View {
 
                 Section("Settings") {
                     NavigationLink {
-                        PlaceholderSettings(title: "Units")
+                        UnitsSettingsView()
                     } label: {
                         Label("Units", systemImage: "ruler")
                     }
@@ -57,7 +58,7 @@ struct ProfileTab: View {
                         Label("Notifications", systemImage: "bell")
                     }
                     NavigationLink {
-                        PlaceholderSettings(title: "Voice Guidance")
+                        VoiceGuidanceSettingsView()
                     } label: {
                         Label("Voice Guidance", systemImage: "speaker.wave.2")
                     }
@@ -167,7 +168,7 @@ struct ProfileTab: View {
                     .font(.headline)
                     .lineLimit(1)
                     .foregroundStyle(authManager.displayName?.isEmpty == false ? .primary : .secondary)
-                Text("\(totalRuns) runs · \(String(format: "%.1f", totalMiles)) mi total")
+                Text("\(totalRuns) runs · \(settings.formatMiles(totalMiles, decimals: 1)) total")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -199,6 +200,47 @@ struct ProfileTab: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
+    }
+}
+
+private struct UnitsSettingsView: View {
+    @Environment(AppSettings.self) private var settings
+
+    var body: some View {
+        @Bindable var s = settings
+        Form {
+            Section {
+                Picker("Distance Unit", selection: $s.useMetric) {
+                    Text("Miles (mi)").tag(false)
+                    Text("Kilometers (km)").tag(true)
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } header: {
+                Text("Distance Unit")
+            } footer: {
+                Text("Applies to all distance displays in the app.")
+            }
+        }
+        .navigationTitle("Units")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct VoiceGuidanceSettingsView: View {
+    @Environment(AppSettings.self) private var settings
+
+    var body: some View {
+        @Bindable var s = settings
+        Form {
+            Section {
+                Toggle("Voice Guidance", isOn: $s.voiceGuidanceEnabled)
+            } footer: {
+                Text("When enabled, the app announces distance milestones during your run.")
+            }
+        }
+        .navigationTitle("Voice Guidance")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

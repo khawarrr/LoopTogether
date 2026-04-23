@@ -162,6 +162,7 @@ struct FriendsTab: View {
 private struct LeaderboardRow: View {
     let entry: LeaderboardEntry
     let period: FriendsTab.LeaderboardPeriod
+    @Environment(AppSettings.self) private var settings
 
     private var medal: String? {
         switch entry.rank {
@@ -199,10 +200,10 @@ private struct LeaderboardRow: View {
                     }
                 }
                 if period == .weekly {
-                    Text(String(format: "%.1f mi this week", entry.weeklyMiles))
+                    Text("\(settings.formatMiles(entry.weeklyMiles)) this week")
                         .font(.caption).foregroundStyle(.secondary)
                 } else {
-                    Text(String(format: "%.1f mi today", entry.dailyMiles))
+                    Text("\(settings.formatMiles(entry.dailyMiles)) today")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

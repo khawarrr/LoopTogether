@@ -25,6 +25,7 @@ struct ActivitiesTab: View {
             List {
                 activeRunSection
                 stepsSection
+                dailyChallengesSection
                 historySection
             }
             .listStyle(.insetGrouped)
@@ -89,6 +90,14 @@ struct ActivitiesTab: View {
             guard steps > 0, let uid = authManager.currentUser?.uid else { return }
             Task { try? await FriendsService.syncDailySteps(uid: uid, steps: steps) }
         }
+    }
+
+    private var todayRuns: [CompletedRun] {
+        runStore.history.filter { Calendar.current.isDateInToday($0.date) }
+    }
+
+    private var dailyChallengesSection: some View {
+        DailyChallengesSection(stepsToday: stepManager.stepsToday, todayRuns: todayRuns)
     }
 
     @ViewBuilder
@@ -335,6 +344,7 @@ struct StatusDot: View {
 
 struct HistoryRunRow: View {
     let run: CompletedRun
+    @Environment(AppSettings.self) private var settings
 
     private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -365,7 +375,7 @@ struct HistoryRunRow: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                Text(String(format: "%.2f mi", run.distanceMiles))
+                Text(settings.formatDistance(run.distanceMeters))
                     .font(.headline)
                     .monospacedDigit()
 
@@ -387,9 +397,7 @@ struct HistoryRunRow: View {
     }
 
     private func paceString(_ pace: Double) -> String {
-        let m = Int(pace)
-        let s = Int((pace - Double(m)) * 60)
-        return String(format: "%d:%02d/mi", m, s)
+        settings.formatPace(pace)
     }
 }
 

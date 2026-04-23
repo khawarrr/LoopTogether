@@ -14,6 +14,7 @@ import CoreLocation
 /// plus summary stats.
 struct RunDetailView: View {
     let run: CompletedRun
+    @Environment(AppSettings.self) private var settings
 
     @State private var position: MapCameraPosition
 
@@ -114,8 +115,8 @@ struct RunDetailView: View {
             HStack(spacing: 10) {
                 statTile(
                     icon: "map.fill",
-                    value: String(format: "%.2f", run.distanceMiles),
-                    unit: "miles"
+                    value: String(format: "%.2f", settings.useMetric ? run.distanceMeters / 1000 : run.distanceMiles),
+                    unit: settings.useMetric ? "km" : "miles"
                 )
                 statTile(
                     icon: "clock.fill",
@@ -162,8 +163,6 @@ struct RunDetailView: View {
 
     private func paceString(_ pace: Double?) -> String {
         guard let pace else { return "--" }
-        let m = Int(pace)
-        let s = Int((pace - Double(m)) * 60)
-        return String(format: "%d:%02d", m, s)
+        return settings.formatPace(pace)
     }
 }

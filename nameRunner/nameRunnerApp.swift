@@ -17,6 +17,7 @@ struct nameRunnerApp: App {
     @State private var phoneSession: PhoneSessionManager
     @State private var profileImageManager = ProfileImageManager()
     @State private var activityManager = RunActivityManager()
+    @State private var appSettings = AppSettings()
 
     init() {
         FirebaseApp.configure()
@@ -39,6 +40,7 @@ struct nameRunnerApp: App {
                 .environment(locationManager)
                 .environment(authManager)
                 .environment(profileImageManager)
+                .environment(appSettings)
                 .onAppear {
                     locationManager.requestPermission()
                     phoneSession.configure(runStore: runStore, authManager: authManager)
