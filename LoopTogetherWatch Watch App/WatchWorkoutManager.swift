@@ -28,6 +28,8 @@ final class WatchWorkoutManager: NSObject {
     var isActive = false
     var currentMode: WorkoutMode = .freeRun
     var lastRun: WatchRunData?
+    var currentCoordinate: CLLocationCoordinate2D?
+    var currentHeading: CLLocationDirection = 0
     var isPaused = false
     var elapsedSeconds: Int = 0
     var distanceMeters: Double = 0
@@ -110,6 +112,7 @@ final class WatchWorkoutManager: NSObject {
             lm.desiredAccuracy = kCLLocationAccuracyBest
             lm.requestWhenInUseAuthorization()
             lm.startUpdatingLocation()
+            lm.startUpdatingHeading()
             locationManager = lm
         }
 
@@ -288,6 +291,7 @@ extension WatchWorkoutManager: CLLocationManagerDelegate {
         DispatchQueue.main.async { [weak self] in
             guard let self, !self.isPaused else { return }
             for loc in locations where loc.horizontalAccuracy > 0 && loc.horizontalAccuracy < 20 {
+                self.currentCoordinate = loc.coordinate
                 if let prev = self.lastLocation {
                     let delta = loc.distance(from: prev)
                     if delta >= 3 {
@@ -301,6 +305,11 @@ extension WatchWorkoutManager: CLLocationManagerDelegate {
                 self.advanceStepIfNeeded(userLocation: loc)
             }
         }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        guard newHeading.headingAccuracy >= 0 else { return }
+        DispatchQueue.main.async { self.currentHeading = newHeading.trueHeading }
     }
 
     private func advanceStepIfNeeded(userLocation: CLLocation) {

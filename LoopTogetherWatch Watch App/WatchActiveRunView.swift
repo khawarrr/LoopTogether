@@ -32,6 +32,39 @@ struct WatchActiveRunView: View {
     }
 
     var body: some View {
+        if isWatchRun && workout.isRouteRun {
+            TabView {
+                statsPage
+                WatchRouteMapView()
+            }
+            .tabViewStyle(.page)
+            .background {
+                WatchRouteMapView()
+                    .opacity(0)
+                    .allowsHitTesting(false)
+            }
+            .confirmationDialog(workout.hasArrivedAtDestination ? "You've arrived! End run?" : "End Run?",
+                                isPresented: $showEndConfirm) {
+                Button("End Run", role: .destructive) { handleEnd() }
+                Button("Cancel", role: .cancel) {}
+            }
+            .onChange(of: workout.hasArrivedAtDestination) { _, arrived in
+                if arrived { showEndConfirm = true }
+            }
+        } else {
+            statsPage
+                .confirmationDialog(workout.hasArrivedAtDestination ? "You've arrived! End run?" : "End Run?",
+                                    isPresented: $showEndConfirm) {
+                    Button("End Run", role: .destructive) { handleEnd() }
+                    Button("Cancel", role: .cancel) {}
+                }
+                .onChange(of: workout.hasArrivedAtDestination) { _, arrived in
+                    if arrived { showEndConfirm = true }
+                }
+        }
+    }
+
+    private var statsPage: some View {
         VStack(spacing: 6) {
             // Elapsed time
             Text(timeString(elapsed))
@@ -93,16 +126,6 @@ struct WatchActiveRunView: View {
             }
         }
         .padding(.horizontal, 4)
-        .onChange(of: workout.hasArrivedAtDestination) { _, arrived in
-            if arrived { showEndConfirm = true }
-        }
-        .confirmationDialog(workout.hasArrivedAtDestination ? "You've arrived! End run?" : "End Run?",
-                            isPresented: $showEndConfirm) {
-            Button("End Run", role: .destructive) {
-                handleEnd()
-            }
-            Button("Cancel", role: .cancel) {}
-        }
     }
 
     private func handleEnd() {
