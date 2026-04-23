@@ -8,6 +8,7 @@
 import SwiftUI
 internal import HealthKit
 import FirebaseAuth
+internal import MapKit
 
 struct ActivitiesTab: View {
     @Environment(RunStore.self) private var runStore
@@ -355,14 +356,7 @@ struct HistoryRunRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.blue.opacity(0.10))
-                    .frame(width: 52, height: 52)
-                Image(systemName: run.isFreeRun ? "figure.run" : "map.fill")
-                    .font(.title3)
-                    .foregroundStyle(.blue)
-            }
+            RunThumbnailView(run: run)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
@@ -398,6 +392,53 @@ struct HistoryRunRow: View {
 
     private func paceString(_ pace: Double) -> String {
         settings.formatPace(pace)
+    }
+}
+
+// MARK: - Run thumbnail
+
+private struct RunThumbnailView: View {
+    let run: CompletedRun
+
+    private var coords: [CLLocationCoordinate2D] { run.displayCoordinates }
+
+    private var mapPosition: MapCameraPosition {
+        guard coords.count > 1 else { return .automatic }
+        let poly = MKPolyline(coordinates: coords, count: coords.count)
+        let rect = poly.boundingMapRect
+        let padded = rect.insetBy(dx: -rect.size.width * 0.2, dy: -rect.size.height * 0.2)
+        return .region(MKCoordinateRegion(padded))
+    }
+
+    var body: some View {
+        if coords.count > 1 {
+            Map(initialPosition: mapPosition, interactionModes: []) {
+                MapPolyline(coordinates: coords)
+                    .stroke(.blue, lineWidth: 2)
+                if let first = coords.first {
+                    Annotation("", coordinate: first) {
+                        Circle().fill(.green).frame(width: 6, height: 6)
+                    }
+                }
+                if let last = coords.last {
+                    Annotation("", coordinate: last) {
+                        Circle().fill(.red).frame(width: 6, height: 6)
+                    }
+                }
+            }
+            .frame(width: 52, height: 52)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .allowsHitTesting(false)
+        } else {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.blue.opacity(0.10))
+                    .frame(width: 52, height: 52)
+                Image(systemName: run.isWalk ? "figure.walk" : run.isFreeRun ? "figure.run" : "map.fill")
+                    .font(.title3)
+                    .foregroundStyle(.blue)
+            }
+        }
     }
 }
 

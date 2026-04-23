@@ -110,14 +110,13 @@ struct ActiveRunDetailView: View {
                 }
             }
             .onAppear {
-                guard !session.isFreeRun else { return }
                 locationManager.startHeadingUpdates()
                 if let loc = locationManager.currentLocation {
                     position = .camera(MapCamera(
                         centerCoordinate: loc.coordinate,
                         distance: 300,
-                        heading: 0,
-                        pitch: 45
+                        heading: session.isFreeRun ? 0 : navHeading,
+                        pitch: session.isFreeRun ? 0 : 45
                     ))
                 }
             }
@@ -125,14 +124,13 @@ struct ActiveRunDetailView: View {
                 locationManager.stopHeadingUpdates()
             }
             .onChange(of: locationManager.currentLocation) { _, loc in
-                guard !session.isFreeRun, let loc else { return }
-                let hdg = navHeading
+                guard let loc else { return }
                 withAnimation(.linear(duration: 0.5)) {
                     position = .camera(MapCamera(
                         centerCoordinate: loc.coordinate,
                         distance: 300,
-                        heading: hdg,
-                        pitch: 45
+                        heading: session.isFreeRun ? 0 : navHeading,
+                        pitch: session.isFreeRun ? 0 : 45
                     ))
                 }
             }

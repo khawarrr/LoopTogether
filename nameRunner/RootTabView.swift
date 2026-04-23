@@ -22,6 +22,7 @@ internal import MapKit
 struct RootTabView: View {
     @Environment(RunStore.self) private var runStore
     @Environment(LocationManager.self) private var locationManager
+    @Environment(AppSettings.self) private var settings
 
     @State private var announcer = SpeechAnnouncer()
     @State private var showDetailsAfterCelebration = false
@@ -51,6 +52,9 @@ struct RootTabView: View {
                 }
         }
         .environment(announcer)
+        .onChange(of: settings.voiceGuidanceEnabled) { _, enabled in
+            announcer.isMuted = !enabled
+        }
         // Central location-update pump. Every GPS update is forwarded to the
         // active session (if any), so breadcrumb tracking is not tied to any
         // particular view being on screen.
@@ -150,8 +154,9 @@ final class SpeechAnnouncer {
     /// When `true`, `announceIfNew` silently records the key (so it won't
     /// replay when unmuted) but doesn't speak. Any in-flight utterance is
     /// also stopped when the user mutes mid-announcement.
-    var isMuted: Bool = false {
+    var isMuted: Bool = !(UserDefaults.standard.object(forKey: "voiceGuidanceEnabled") as? Bool ?? true) {
         didSet {
+            UserDefaults.standard.set(!isMuted, forKey: "voiceGuidanceEnabled")
             if isMuted {
                 synthesizer.stopSpeaking(at: .immediate)
             }
