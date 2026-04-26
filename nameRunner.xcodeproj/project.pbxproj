@@ -374,13 +374,13 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "LoopTogether uses your location to track your run route.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "LoopTogether uses motion data to track indoor walk \n  distance.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.nameRunner;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.LoopTogether;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -412,13 +412,13 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "LoopTogether uses your location to track your run route.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "LoopTogether uses motion data to track indoor walk \n  distance.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.nameRunner;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Khawar.LoopTogether;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -453,7 +453,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.LoopTogetherWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether.LoopTogetherWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -485,7 +485,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.LoopTogetherWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether.LoopTogetherWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -630,9 +630,11 @@
 				INFOPLIST_KEY_CFBundleDisplayName = LoopTogether;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSGKFriendListUsageDescription = "";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "nameRunner reads your step count to show daily progress.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "LoopTogether reads your step count to show daily progress.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "LoopTogether uses HealthKit to save your workout data. ";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "LoopTogether needs your location to center running routes around where you are.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "name​Runner needs your location to center running routes around where you are.\nname​Runner needs your location to center running routes around where you are.\n";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -648,7 +650,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -682,9 +684,11 @@
 				INFOPLIST_KEY_CFBundleDisplayName = LoopTogether;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSGKFriendListUsageDescription = "";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "nameRunner reads your step count to show daily progress.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "LoopTogether reads your step count to show daily progress.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "LoopTogether uses HealthKit to save your workout data. ";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "LoopTogether needs your location to center running routes around where you are.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "name​Runner needs your location to center running routes around where you are.\nname​Runner needs your location to center running routes around where you are.\n";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -700,7 +704,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
