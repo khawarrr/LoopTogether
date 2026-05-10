@@ -10,7 +10,7 @@ struct FriendsTab: View {
     @Environment(AuthManager.self) private var authManager
     @State private var friendsManager = FriendsManager()
     @State private var showAddFriend = false
-    @State private var selectedPeriod: LeaderboardPeriod = .weekly
+    @State private var selectedPeriod: LeaderboardPeriod = .daily
 
     enum LeaderboardPeriod { case daily, weekly }
 
@@ -278,9 +278,8 @@ struct AddFriendView: View {
                             .textSelection(.enabled)
                     }
                     ShareLink(
-                        item: "Add me on LoopTogether! My code: \(myUID)",
-                        subject: Text("nameRunner Friend Code"),
-                        message: Text("Use this code to add me as a friend.")
+                        item: "Use this code to add me on LoopTogether:\n\(myUID)",
+                        subject: Text("LoopTogether Friend Code")
                     ) {
                         Label("Share My Code", systemImage: "square.and.arrow.up")
                     }

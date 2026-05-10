@@ -23,6 +23,7 @@ struct ActiveRunDetailView: View {
     @Environment(RunStore.self) private var runStore
     @Environment(LocationManager.self) private var locationManager
     @Environment(SpeechAnnouncer.self) private var announcer
+    @Environment(AppSettings.self) private var settings
 
     @State private var position: MapCameraPosition
     @State private var showNav = false
@@ -116,7 +117,7 @@ struct ActiveRunDetailView: View {
                         centerCoordinate: loc.coordinate,
                         distance: 300,
                         heading: session.isFreeRun ? 0 : navHeading,
-                        pitch: session.isFreeRun ? 0 : 45
+                        pitch: 0
                     ))
                 }
             }
@@ -130,7 +131,7 @@ struct ActiveRunDetailView: View {
                         centerCoordinate: loc.coordinate,
                         distance: 300,
                         heading: session.isFreeRun ? 0 : navHeading,
-                        pitch: session.isFreeRun ? 0 : 45
+                        pitch: 0
                     ))
                 }
             }
@@ -142,7 +143,7 @@ struct ActiveRunDetailView: View {
                         centerCoordinate: loc.coordinate,
                         distance: 300,
                         heading: navHeading,
-                        pitch: 45
+                        pitch: 0
                     ))
                 }
             }
@@ -158,12 +159,23 @@ struct ActiveRunDetailView: View {
 
     private var mapView: some View {
         Map(position: $position) {
-            UserAnnotation()
+            if let loc = locationManager.currentLocation {
+                Annotation("", coordinate: loc.coordinate) {
+                    RunnerAnnotationView(
+                        avatar: settings.runnerAvatar,
+                        heading: navHeading
+                    )
+                }
+            }
 
             // Planned route — adapts to system theme for light/dark contrast
             if let route = session.route {
                 MapPolyline(route)
                     .stroke(Color.primary.opacity(0.35), lineWidth: 4)
+            }
+            ForEach(Array(session.pendingLegs.enumerated()), id: \.offset) { _, leg in
+                MapPolyline(leg)
+                    .stroke(Color.primary.opacity(0.2), lineWidth: 4)
             }
 
             // Actual GPS breadcrumbs — solid blue core with a white halo
@@ -189,7 +201,30 @@ struct ActiveRunDetailView: View {
                 .padding(.horizontal, 12)
                 .padding(.top, 6)
         }
+        .overlay(alignment: .topTrailing) {
+            if !session.isFreeRun {
+                Button(action: frameFullRoute) {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .padding(10)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+                }
+                .padding(.top, 56)
+                .padding(.trailing, 12)
+            }
+        }
         .frame(maxHeight: .infinity)
+    }
+
+    private func frameFullRoute() {
+        var coords = session.allPlannedCoordinates
+        coords += session.breadcrumbs
+        guard !coords.isEmpty else { return }
+        let poly = MKPolyline(coordinates: coords, count: coords.count)
+        let rect = poly.boundingMapRect
+        let padded = rect.insetBy(dx: -rect.size.width * 0.25, dy: -rect.size.height * 0.25)
+        withAnimation { position = .rect(padded) }
     }
 
     @ViewBuilder
@@ -370,5 +405,32 @@ struct StatTile: View {
         .padding(.vertical, 14)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+    }
+}
+
+// MARK: - Runner annotation
+
+struct RunnerAnnotationView: View {
+    let avatar: String
+    let heading: Double
+
+    private var color: Color { avatar == "female" ? .pink : .blue }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(color)
+                .frame(width: 38, height: 38)
+                .shadow(radius: 3)
+            Image(systemName: "figure.run")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+            // Direction arrow at the top of the circle
+            Image(systemName: "arrowtriangle.up.fill")
+                .font(.system(size: 8))
+                .foregroundColor(.white.opacity(0.8))
+                .offset(y: -16)
+        }
+        .rotationEffect(.degrees(heading))
     }
 }

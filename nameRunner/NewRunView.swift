@@ -45,9 +45,13 @@ struct NewRunView: View {
                         MapPolyline(route)
                             .stroke(.blue, lineWidth: 5)
                     }
-                    if let destination = routeGenerator.destination {
-                        Marker("Finish", coordinate: destination)
-                            .tint(.red)
+                    ForEach(Array(routeGenerator.loopRemainingLegs.enumerated()), id: \.offset) { _, leg in
+                        MapPolyline(leg)
+                            .stroke(.blue.opacity(0.55), lineWidth: 5)
+                    }
+                    if let origin = routeGenerator.destination {
+                        Marker("Start / Finish", systemImage: "flag.checkered.circle.fill", coordinate: origin)
+                            .tint(.green)
                     }
                 }
                 .mapControls {
@@ -56,6 +60,19 @@ struct NewRunView: View {
                     MapScaleView()
                 }
                 .ignoresSafeArea(edges: .bottom)
+                .overlay(alignment: .topTrailing) {
+                    if routeGenerator.route != nil {
+                        Button(action: frameFullRoute) {
+                            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .padding(10)
+                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        }
+                        .padding(.top, 56)
+                        .padding(.trailing, 12)
+                    }
+                }
 
                 controlCard
             }
@@ -87,7 +104,7 @@ struct NewRunView: View {
             }
 
             if routeGenerator.route != nil {
-                Text("Route: \(routeGenerator.routeDistanceMiles, specifier: "%.2f") mi one way")
+                Text("Loop: \(routeGenerator.routeDistanceMiles, specifier: "%.2f") mi total")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -187,17 +204,30 @@ struct NewRunView: View {
         hasCenteredOnUser = true
     }
 
+    private func frameFullRoute() {
+        guard let route = routeGenerator.route else { return }
+        var rect = route.polyline.boundingMapRect
+        for leg in routeGenerator.loopRemainingLegs {
+            rect = rect.union(leg.polyline.boundingMapRect)
+        }
+        let padded = rect.insetBy(dx: -rect.size.width * 0.2, dy: -rect.size.height * 0.2)
+        withAnimation { position = .rect(padded) }
+    }
+
     private func generate() {
         let center = locationManager.currentLocation?.coordinate ?? fallbackCenter
 
         Task {
-            await routeGenerator.generateRandomRoute(
+            await routeGenerator.generateLoopRoute(
                 targetMiles: targetMiles,
                 from: center
             )
 
             if let route = routeGenerator.route {
-                let rect = route.polyline.boundingMapRect
+                var rect = route.polyline.boundingMapRect
+                for leg in routeGenerator.loopRemainingLegs {
+                    rect = rect.union(leg.polyline.boundingMapRect)
+                }
                 let padded = rect.insetBy(
                     dx: -rect.size.width * 0.2,
                     dy: -rect.size.height * 0.2
@@ -208,8 +238,10 @@ struct NewRunView: View {
     }
 
     private func startRun() {
-        guard let route = routeGenerator.route else { return }
-        runStore.startRouteRun(route: route, destination: routeGenerator.destination)
+        guard let outLeg = routeGenerator.route,
+              let origin = routeGenerator.destination else { return }
+        let allLegs = [outLeg] + routeGenerator.loopRemainingLegs
+        runStore.startLoopRun(legs: allLegs, origin: origin)
         dismiss()
     }
 }

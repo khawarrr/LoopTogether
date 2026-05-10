@@ -15,6 +15,7 @@ struct ActivitiesTab: View {
     @Environment(AuthManager.self) private var authManager
 
     @State private var showNewRun = false
+    @State private var showBuildRoute = false
     @State private var showActiveRunDetail = false
     @State private var showAuth = false
     @State private var stepManager = StepCountManager()
@@ -27,6 +28,11 @@ struct ActivitiesTab: View {
                 activeRunSection
                 stepsSection
                 dailyChallengesSection
+                Section("Monthly Activity") {
+                    RunCalendarView(history: runStore.history)
+                        .listRowInsets(.init())
+                        .listRowBackground(Color.clear)
+                }
                 historySection
             }
             .listStyle(.insetGrouped)
@@ -45,6 +51,12 @@ struct ActivitiesTab: View {
                         } label: {
                             Label("Generate Route", systemImage: "map")
                         }
+
+                        Button {
+                            showBuildRoute = true
+                        } label: {
+                            Label("Build Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
+                        }
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
@@ -54,6 +66,9 @@ struct ActivitiesTab: View {
             }
             .sheet(isPresented: $showNewRun) {
                 NewRunView()
+            }
+            .sheet(isPresented: $showBuildRoute) {
+                BuildRouteView()
             }
             .sheet(isPresented: $showAuth) {
                 AuthView()
@@ -439,6 +454,148 @@ private struct RunThumbnailView: View {
                     .foregroundStyle(.blue)
             }
         }
+    }
+}
+
+// MARK: - Run Calendar
+
+struct RunCalendarView: View {
+    let history: [CompletedRun]
+    @Environment(AppSettings.self) private var settings
+
+    @State private var displayedMonth: Date = {
+        let c = Calendar.current
+        return c.date(from: c.dateComponents([.year, .month], from: Date())) ?? Date()
+    }()
+
+    private let cal = Calendar.current
+    private let dayLabels = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
+
+    private var monthTitle: String {
+        let f = DateFormatter()
+        f.dateFormat = "MMMM yyyy"
+        return f.string(from: displayedMonth)
+    }
+
+    private var daysInMonth: Int {
+        cal.range(of: .day, in: .month, for: displayedMonth)?.count ?? 30
+    }
+
+    private var firstWeekdayOffset: Int {
+        cal.component(.weekday, from: displayedMonth) - 1
+    }
+
+    private var milesByDay: [Int: Double] {
+        let year  = cal.component(.year,  from: displayedMonth)
+        let month = cal.component(.month, from: displayedMonth)
+        var result: [Int: Double] = [:]
+        for run in history {
+            guard cal.component(.year,  from: run.date) == year,
+                  cal.component(.month, from: run.date) == month else { continue }
+            let day = cal.component(.day, from: run.date)
+            result[day, default: 0] += run.distanceMiles
+        }
+        return result
+    }
+
+    private func isToday(_ day: Int) -> Bool {
+        let today = cal.dateComponents([.year, .month, .day], from: Date())
+        return today.year  == cal.component(.year,  from: displayedMonth) &&
+               today.month == cal.component(.month, from: displayedMonth) &&
+               today.day   == day
+    }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            // Month navigation
+            HStack {
+                Button {
+                    displayedMonth = cal.date(byAdding: .month, value: -1, to: displayedMonth) ?? displayedMonth
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.blue)
+                }
+                Spacer()
+                Text(monthTitle)
+                    .font(.subheadline.bold())
+                Spacer()
+                Button {
+                    displayedMonth = cal.date(byAdding: .month, value: 1, to: displayedMonth) ?? displayedMonth
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.blue)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+
+            // Day-of-week headers
+            LazyVGrid(columns: columns, spacing: 2) {
+                ForEach(dayLabels, id: \.self) { label in
+                    Text(label)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .padding(.horizontal, 8)
+
+            // Calendar grid
+            LazyVGrid(columns: columns, spacing: 4) {
+                ForEach(0..<firstWeekdayOffset, id: \.self) { _ in
+                    Color.clear.frame(height: 44)
+                }
+                ForEach(1...daysInMonth, id: \.self) { day in
+                    CalendarDayCell(
+                        day: day,
+                        miles: milesByDay[day],
+                        isToday: isToday(day),
+                        settings: settings
+                    )
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.bottom, 8)
+        }
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
+    }
+}
+
+private struct CalendarDayCell: View {
+    let day: Int
+    let miles: Double?
+    let isToday: Bool
+    let settings: AppSettings
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text("\(day)")
+                .font(.system(size: 13, weight: isToday ? .bold : .regular))
+                .foregroundStyle(isToday ? .blue : .primary)
+
+            if let miles {
+                Text(String(format: "%.1f", miles))
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(Color.blue, in: Capsule())
+            } else {
+                Color.clear.frame(height: 14)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isToday ? Color.blue.opacity(0.1) : Color.clear)
+        )
     }
 }
 

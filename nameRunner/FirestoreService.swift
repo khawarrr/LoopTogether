@@ -38,7 +38,9 @@ struct FirestoreService {
             .collection("runs")
             .order(by: "date", descending: true)
             .getDocuments()
-        return snapshot.documents.compactMap(makeRun)
+        return snapshot.documents.compactMap(makeRun).filter {
+            $0.distanceMiles >= 0.20 || $0.durationSeconds >= 120
+        }
     }
 
     static func deleteUserData(uid: String) async throws {

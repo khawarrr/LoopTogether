@@ -62,6 +62,11 @@ struct ProfileTab: View {
                     } label: {
                         Label("Voice Guidance", systemImage: "speaker.wave.2")
                     }
+                    NavigationLink {
+                        RunnerAvatarSettingsView()
+                    } label: {
+                        Label("Runner Icon", systemImage: "figure.run")
+                    }
                 }
 
                 Section("About") {
@@ -241,6 +246,61 @@ private struct VoiceGuidanceSettingsView: View {
         }
         .navigationTitle("Voice Guidance")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct RunnerAvatarSettingsView: View {
+    @Environment(AppSettings.self) private var settings
+
+    var body: some View {
+        @Bindable var s = settings
+        Form {
+            Section {
+                HStack(spacing: 20) {
+                    Spacer()
+                    avatarOption(avatar: "male", label: "Male", color: .blue, icon: "figure.run")
+                    Spacer()
+                    avatarOption(avatar: "female", label: "Female", color: .pink, icon: "figure.run")
+                    Spacer()
+                }
+                .padding(.vertical, 8)
+                .listRowBackground(Color.clear)
+            } header: {
+                Text("Choose your runner icon")
+            } footer: {
+                Text("Shown on the map during your run.")
+            }
+        }
+        .navigationTitle("Runner Icon")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func avatarOption(avatar: String, label: String, color: Color, icon: String) -> some View {
+        Button {
+            settings.runnerAvatar = avatar
+        } label: {
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(color)
+                        .frame(width: 64, height: 64)
+                    Image(systemName: icon)
+                        .font(.system(size: 30, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .overlay(
+                    Circle()
+                        .strokeBorder(color, lineWidth: settings.runnerAvatar == avatar ? 3 : 0)
+                        .frame(width: 74, height: 74)
+                )
+                Text(label)
+                    .font(.subheadline)
+                    .fontWeight(settings.runnerAvatar == avatar ? .semibold : .regular)
+                    .foregroundStyle(settings.runnerAvatar == avatar ? color : .secondary)
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
 

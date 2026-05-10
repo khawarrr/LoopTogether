@@ -13,6 +13,9 @@ final class AppSettings {
     var voiceGuidanceEnabled: Bool = (UserDefaults.standard.object(forKey: "voiceGuidanceEnabled") as? Bool) ?? true {
         didSet { UserDefaults.standard.set(voiceGuidanceEnabled, forKey: "voiceGuidanceEnabled") }
     }
+    var runnerAvatar: String = UserDefaults.standard.string(forKey: "runnerAvatar") ?? "male" {
+        didSet { UserDefaults.standard.set(runnerAvatar, forKey: "runnerAvatar") }
+    }
 
     var distanceUnit: String { useMetric ? "km" : "mi" }
     var paceUnit: String { useMetric ? "/km" : "/mi" }

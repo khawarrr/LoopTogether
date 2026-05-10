@@ -27,6 +27,13 @@ final class RunSession: Identifiable {
     /// Live progress along the planned route. Only non-nil for route-based runs.
     var progress: RouteProgress?
 
+    /// Remaining legs for loop runs. Front is popped each time the current leg completes.
+    private(set) var pendingLegs: [MKRoute]
+    /// All pending leg polylines stored upfront for map display (before each leg is consumed).
+    private let allPendingLegCoords: [[CLLocationCoordinate2D]]
+    /// Index of the currently active leg (0 = outbound).
+    private(set) var currentLegIndex = 0
+
     /// Actual GPS path of the run. Grows as location updates come in.
     private(set) var breadcrumbs: [CLLocationCoordinate2D] = []
 
@@ -40,9 +47,11 @@ final class RunSession: Identifiable {
     private var accumulatedBeforePause: TimeInterval = 0
     private var currentSegmentStart: Date?
 
-    init(route: MKRoute?, destination: CLLocationCoordinate2D?) {
+    init(route: MKRoute?, destination: CLLocationCoordinate2D?, pendingLegs: [MKRoute] = []) {
         self.route = route
         self.destination = destination
+        self.pendingLegs = pendingLegs
+        self.allPendingLegCoords = pendingLegs.map { $0.polyline.coordinates }
         self.startedAt = Date()
         if let route {
             self.progress = RouteProgress(route: route)
@@ -114,6 +123,13 @@ final class RunSession: Identifiable {
 
         // Also update route progress for turn-by-turn (route runs only).
         progress?.update(userLocation: userLocation)
+
+        // When current leg is done, pop the next one seamlessly.
+        if progress?.hasArrived == true, !pendingLegs.isEmpty {
+            let next = pendingLegs.removeFirst()
+            currentLegIndex += 1
+            progress = RouteProgress(route: next)
+        }
     }
 
     // MARK: Stats
@@ -123,7 +139,15 @@ final class RunSession: Identifiable {
 
     /// Remaining distance along the planned route. `nil` for free runs.
     var remainingMeters: Double? {
-        progress?.remainingDistance
+        guard let p = progress else { return nil }
+        let pendingDistance = pendingLegs.reduce(0) { $0 + $1.distance }
+        return p.remainingDistance + pendingDistance
+    }
+
+    /// Combined planned coordinates for all legs (for history map display).
+    var allPlannedCoordinates: [CLLocationCoordinate2D] {
+        let outbound = route?.polyline.coordinates ?? []
+        return outbound + allPendingLegCoords.flatMap { $0 }
     }
     var remainingMiles: Double? {
         remainingMeters.map { $0 / 1609.34 }
@@ -216,6 +240,16 @@ final class RunStore {
         activeSession = RunSession(route: route, destination: destination)
     }
 
+    func startLoopRun(legs: [MKRoute], origin: CLLocationCoordinate2D) {
+        guard let first = legs.first else { return }
+        activeSession = RunSession(route: first, destination: origin, pendingLegs: Array(legs.dropFirst()))
+    }
+
+    func startBuiltRun(legs: [MKRoute], destination: CLLocationCoordinate2D) {
+        guard let first = legs.first else { return }
+        activeSession = RunSession(route: first, destination: destination, pendingLegs: Array(legs.dropFirst()))
+    }
+
     func startFreeRun() {
         activeSession = RunSession(route: nil, destination: nil)
     }
@@ -257,6 +291,9 @@ final class RunStore {
         guard let session = activeSession else { return }
         session.pause()
 
+        let distanceMiles = session.distanceCoveredMeters / 1609.34
+        let isMeaningful = distanceMiles >= 0.20 || session.elapsedTime >= 120
+
         let completed = CompletedRun(
             id: session.id,
             date: session.startedAt,
@@ -264,11 +301,15 @@ final class RunStore {
             distanceMeters: session.distanceCoveredMeters,
             caloriesBurned: session.caloriesBurned,
             pathCoordinates: session.breadcrumbs,
-            plannedRouteCoordinates: session.route?.polyline.coordinates,
+            plannedRouteCoordinates: session.allPlannedCoordinates.isEmpty ? nil : session.allPlannedCoordinates,
             destination: session.destination,
             workoutType: session.isFreeRun ? "Free Run" : "Route Run"
         )
-        history.insert(completed, at: 0)
+
+        // Always show the summary, but only save to history if the run is meaningful.
+        if isMeaningful {
+            history.insert(completed, at: 0)
+        }
         lastCompletedRun = completed
         activeSession = nil
 
@@ -276,7 +317,7 @@ final class RunStore {
             shouldShowCompletionCelebration = true
         }
 
-        if let uid = authManager.currentUser?.uid {
+        if isMeaningful, let uid = authManager.currentUser?.uid {
             let miles = completed.distanceMiles
             let name = authManager.displayName ?? "Runner"
             Task {
