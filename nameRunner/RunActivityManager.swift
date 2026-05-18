@@ -43,11 +43,14 @@ final class RunActivityManager {
     }
 
     func end() {
-        Task {
-            await activity?.end(.init(state: activity?.content.state ?? .init(
-                distanceMiles: 0, paceMinPerMile: 0, isPaused: false
-            ), staleDate: nil), dismissalPolicy: .immediate)
-        }
+        let current = activity
         activity = nil
+        Task {
+            await current?.end(
+                .init(state: current?.content.state ?? .init(distanceMiles: 0, paceMinPerMile: 0, isPaused: false),
+                      staleDate: nil),
+                dismissalPolicy: .immediate
+            )
+        }
     }
 }

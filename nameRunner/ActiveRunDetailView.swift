@@ -28,6 +28,7 @@ struct ActiveRunDetailView: View {
     @State private var position: MapCameraPosition
     @State private var showNav = false
     @State private var confirmEnd = false
+    @State private var isOverviewMode = false
 
     private static let distanceFormatter: MKDistanceFormatter = {
         let f = MKDistanceFormatter()
@@ -125,7 +126,7 @@ struct ActiveRunDetailView: View {
                 locationManager.stopHeadingUpdates()
             }
             .onChange(of: locationManager.currentLocation) { _, loc in
-                guard let loc else { return }
+                guard !isOverviewMode, let loc else { return }
                 withAnimation(.linear(duration: 0.5)) {
                     position = .camera(MapCamera(
                         centerCoordinate: loc.coordinate,
@@ -136,7 +137,8 @@ struct ActiveRunDetailView: View {
                 }
             }
             .onChange(of: locationManager.heading) { _, _ in
-                guard !session.isFreeRun,
+                guard !isOverviewMode,
+                      !session.isFreeRun,
                       let loc = locationManager.currentLocation else { return }
                 withAnimation(.linear(duration: 0.3)) {
                     position = .camera(MapCamera(
@@ -203,10 +205,10 @@ struct ActiveRunDetailView: View {
         }
         .overlay(alignment: .topTrailing) {
             if !session.isFreeRun {
-                Button(action: frameFullRoute) {
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                Button(action: isOverviewMode ? resumeFollowing : frameFullRoute) {
+                    Image(systemName: isOverviewMode ? "location.fill" : "arrow.up.left.and.arrow.down.right")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(isOverviewMode ? .blue : .primary)
                         .padding(10)
                         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
                 }
@@ -224,7 +226,21 @@ struct ActiveRunDetailView: View {
         let poly = MKPolyline(coordinates: coords, count: coords.count)
         let rect = poly.boundingMapRect
         let padded = rect.insetBy(dx: -rect.size.width * 0.25, dy: -rect.size.height * 0.25)
+        isOverviewMode = true
         withAnimation { position = .rect(padded) }
+    }
+
+    private func resumeFollowing() {
+        isOverviewMode = false
+        guard let loc = locationManager.currentLocation else { return }
+        withAnimation {
+            position = .camera(MapCamera(
+                centerCoordinate: loc.coordinate,
+                distance: 300,
+                heading: session.isFreeRun ? 0 : navHeading,
+                pitch: 0
+            ))
+        }
     }
 
     @ViewBuilder

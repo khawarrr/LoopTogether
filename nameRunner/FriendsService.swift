@@ -48,7 +48,7 @@ struct FriendsService {
 
     static func syncDailySteps(uid: String, steps: Int) async throws {
         try await db.collection("users").document(uid).setData(
-            ["dailySteps": steps, "dayStart": Timestamp(date: currentDayStart())],
+            ["dailySteps": steps, "dayKey": currentDayKey()],
             merge: true
         )
     }
@@ -70,9 +70,21 @@ struct FriendsService {
 
     private static func makeProfile(from doc: DocumentSnapshot) -> UserProfile? {
         guard doc.exists, let data = doc.data() else { return nil }
-        let dayStart = currentDayStart()
-        let storedDay = (data["dayStart"] as? Timestamp)?.dateValue()
-        let isToday = storedDay.map { Calendar.current.isDate($0, inSameDayAs: dayStart) } ?? false
+
+        // Use a plain date string for day comparison — avoids timezone mismatch
+        // when friends are in different time zones.
+        let todayKey = currentDayKey()
+        let storedDayKey = data["dayKey"] as? String
+
+        // Fall back to legacy timestamp comparison for profiles not yet migrated.
+        let isToday: Bool
+        if let storedDayKey {
+            isToday = storedDayKey == todayKey
+        } else {
+            let storedDay = (data["dayStart"] as? Timestamp)?.dateValue()
+            isToday = storedDay.map { Calendar.current.isDate($0, inSameDayAs: currentDayStart()) } ?? false
+        }
+
         return UserProfile(
             id: doc.documentID,
             displayName: data["displayName"] as? String ?? "Runner",
@@ -161,6 +173,13 @@ struct FriendsService {
 
     static func currentDayStart() -> Date {
         Calendar.current.startOfDay(for: Date())
+    }
+
+    static func currentDayKey() -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f.string(from: Date())
     }
 }
 
