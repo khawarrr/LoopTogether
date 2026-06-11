@@ -14,6 +14,8 @@ struct ActivitiesTab: View {
     @Environment(RunStore.self) private var runStore
     @Environment(AuthManager.self) private var authManager
 
+    @Environment(AppSettings.self) private var settings
+
     @State private var showNewRun = false
     @State private var showBuildRoute = false
     @State private var showActiveRunDetail = false
@@ -27,6 +29,7 @@ struct ActivitiesTab: View {
             List {
                 activeRunSection
                 stepsSection
+                monthlyGoalSection
                 dailyChallengesSection
                 Section("Monthly Activity") {
                     RunCalendarView(history: runStore.history)
@@ -114,6 +117,61 @@ struct ActivitiesTab: View {
 
     private var dailyChallengesSection: some View {
         DailyChallengesSection(stepsToday: stepManager.stepsToday, todayRuns: todayRuns)
+    }
+
+    private static let monthFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMMM"
+        return f
+    }()
+
+    @ViewBuilder
+    private var monthlyGoalSection: some View {
+        if settings.monthlyGoalMiles > 0 {
+            let cal = Calendar.current
+            let now = Date()
+            let monthMiles = runStore.history
+                .filter { cal.isDate($0.date, equalTo: now, toGranularity: .month) }
+                .reduce(0) { $0 + $1.distanceMiles }
+            let daysInMonth = cal.range(of: .day, in: .month, for: now)?.count ?? 30
+            let dayOfMonth = cal.component(.day, from: now)
+            let daysRemaining = max(0, daysInMonth - dayOfMonth)
+            let monthName = Self.monthFormatter.string(from: now)
+
+            Section {
+                MonthlyGoalRingView(
+                    goalMiles: settings.monthlyGoalMiles,
+                    completedMiles: monthMiles,
+                    daysRemaining: daysRemaining,
+                    monthName: monthName
+                )
+                .listRowInsets(.init())
+                .listRowBackground(Color.clear)
+            }
+        } else {
+            Section {
+                NavigationLink(destination: MonthlyGoalSettingsView()) {
+                    HStack(spacing: 14) {
+                        ZStack {
+                            Circle()
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 4)
+                                .frame(width: 44, height: 44)
+                            Image(systemName: "target")
+                                .font(.title3)
+                                .foregroundStyle(.blue)
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Set a Monthly Goal")
+                                .font(.headline)
+                            Text("Track your progress toward a distance goal each month.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 6)
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -454,6 +512,86 @@ private struct RunThumbnailView: View {
                     .foregroundStyle(.blue)
             }
         }
+    }
+}
+
+// MARK: - Monthly Goal Ring
+
+struct MonthlyGoalRingView: View {
+    let goalMiles: Double
+    let completedMiles: Double
+    let daysRemaining: Int
+    let monthName: String
+
+    private var progress: Double { min(completedMiles / max(goalMiles, 1), 1.0) }
+    private var percent: Int { Int(progress * 100) }
+
+    private var ringColor: Color {
+        switch progress {
+        case ..<0.4: return .blue
+        case ..<0.8: return .orange
+        default:     return .green
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("\(monthName.uppercased()) GOAL")
+                .font(.caption.bold())
+                .foregroundStyle(.secondary)
+                .tracking(1.5)
+
+            ZStack {
+                // Background ring
+                Circle()
+                    .stroke(Color.secondary.opacity(0.15), lineWidth: 18)
+                    .frame(width: 160, height: 160)
+
+                // Progress ring
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(ringColor,
+                            style: StrokeStyle(lineWidth: 18, lineCap: .round))
+                    .frame(width: 160, height: 160)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.easeOut(duration: 0.8), value: progress)
+
+                // Center content
+                VStack(spacing: 4) {
+                    Text("\(percent)%")
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundStyle(ringColor)
+                        .monospacedDigit()
+                    Text("Complete")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                }
+            }
+
+            VStack(spacing: 6) {
+                Text(String(format: "%.1f / %.0f miles", completedMiles, goalMiles))
+                    .font(.title3.bold())
+                    .monospacedDigit()
+
+                HStack(spacing: 4) {
+                    if progress >= 1.0 {
+                        Label("Goal reached!", systemImage: "checkmark.seal.fill")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.green)
+                    } else {
+                        Text("\(daysRemaining) day\(daysRemaining == 1 ? "" : "s") remaining")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
     }
 }
 

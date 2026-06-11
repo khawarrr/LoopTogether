@@ -67,6 +67,19 @@ struct ProfileTab: View {
                     } label: {
                         Label("Runner Icon", systemImage: "figure.run")
                     }
+                    NavigationLink {
+                        MonthlyGoalSettingsView()
+                    } label: {
+                        HStack {
+                            Label("Monthly Goal", systemImage: "target")
+                            Spacer()
+                            if settings.monthlyGoalMiles > 0 {
+                                Text(String(format: "%.0f mi", settings.monthlyGoalMiles))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
                 }
 
                 Section("About") {
@@ -245,6 +258,74 @@ private struct VoiceGuidanceSettingsView: View {
             }
         }
         .navigationTitle("Voice Guidance")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct MonthlyGoalSettingsView: View {
+    @Environment(AppSettings.self) private var settings
+
+    private let suggestions: [(label: String, miles: Double)] = [
+        ("Beginner",     10),
+        ("Active",       20),
+        ("Runner",       30),
+        ("Advanced",     50),
+        ("Elite",       100),
+    ]
+
+    var body: some View {
+        @Bindable var s = settings
+        Form {
+            Section {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Target")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(s.monthlyGoalMiles > 0
+                             ? String(format: "%.0f miles", s.monthlyGoalMiles)
+                             : "No goal set")
+                            .font(.subheadline.bold())
+                    }
+                    Slider(value: $s.monthlyGoalMiles, in: 0...200, step: 5)
+                        .tint(.blue)
+                    if s.monthlyGoalMiles == 0 {
+                        Text("Set to 0 to disable the monthly goal.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
+            } header: {
+                Text("Distance Goal")
+            }
+
+            Section("Suggestions") {
+                ForEach(suggestions, id: \.label) { item in
+                    Button {
+                        s.monthlyGoalMiles = item.miles
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.label)
+                                    .foregroundStyle(.primary)
+                                Text(String(format: "%.0f miles / month", item.miles))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if s.monthlyGoalMiles == item.miles {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.blue)
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Monthly Goal")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

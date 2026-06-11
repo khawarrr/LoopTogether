@@ -33,6 +33,13 @@
 			remoteGlobalIDString = D5B6A7032F987356007C7872;
 			remoteInfo = LoopTogetherWidgetExtension;
 		};
+		D5B6AA352FBED130007C7872 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D5E427752F94654D0009EA12 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D5E4277C2F94654D0009EA12;
+			remoteInfo = LoopTogether;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -65,7 +72,8 @@
 		D5B6A7042F987356007C7872 /* LoopTogetherWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LoopTogetherWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5B6A7062F987356007C7872 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		D5B6A7082F987356007C7872 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		D5E4277D2F94654D0009EA12 /* nameRunner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nameRunner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5B6AA2F2FBED130007C7872 /* LoopTogetherUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopTogetherUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5E4277D2F94654D0009EA12 /* LoopTogether.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LoopTogether.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -76,12 +84,12 @@
 			);
 			target = D5B6A7032F987356007C7872 /* LoopTogetherWidgetExtension */;
 		};
-		D5E427922F9479FE0009EA12 /* Exceptions for "nameRunner" folder in "nameRunner" target */ = {
+		D5E427922F9479FE0009EA12 /* Exceptions for "nameRunner" folder in "LoopTogether" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = D5E4277C2F94654D0009EA12 /* nameRunner */;
+			target = D5E4277C2F94654D0009EA12 /* LoopTogether */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -99,10 +107,15 @@
 			path = LoopTogetherWidget;
 			sourceTree = "<group>";
 		};
+		D5B6AA302FBED130007C7872 /* LoopTogetherUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LoopTogetherUITests;
+			sourceTree = "<group>";
+		};
 		D5E4277F2F94654D0009EA12 /* nameRunner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D5E427922F9479FE0009EA12 /* Exceptions for "nameRunner" folder in "nameRunner" target */,
+				D5E427922F9479FE0009EA12 /* Exceptions for "nameRunner" folder in "LoopTogether" target */,
 			);
 			path = nameRunner;
 			sourceTree = "<group>";
@@ -123,6 +136,13 @@
 			files = (
 				D5B6A7092F987356007C7872 /* SwiftUI.framework in Frameworks */,
 				D5B6A7072F987356007C7872 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5B6AA2C2FBED130007C7872 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +176,7 @@
 				D5E4277F2F94654D0009EA12 /* nameRunner */,
 				D5B6A6DB2F970445007C7872 /* LoopTogetherWatch Watch App */,
 				D5B6A70A2F987356007C7872 /* LoopTogetherWidget */,
+				D5B6AA302FBED130007C7872 /* LoopTogetherUITests */,
 				D5B6A7052F987356007C7872 /* Frameworks */,
 				D5E4277E2F94654D0009EA12 /* Products */,
 			);
@@ -164,9 +185,10 @@
 		D5E4277E2F94654D0009EA12 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D5E4277D2F94654D0009EA12 /* nameRunner.app */,
+				D5E4277D2F94654D0009EA12 /* LoopTogether.app */,
 				D5B6A6DA2F970445007C7872 /* LoopTogetherWatch Watch App.app */,
 				D5B6A7042F987356007C7872 /* LoopTogetherWidgetExtension.appex */,
+				D5B6AA2F2FBED130007C7872 /* LoopTogetherUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -218,9 +240,32 @@
 			productReference = D5B6A7042F987356007C7872 /* LoopTogetherWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		D5E4277C2F94654D0009EA12 /* nameRunner */ = {
+		D5B6AA2E2FBED130007C7872 /* LoopTogetherUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D5E427882F94654E0009EA12 /* Build configuration list for PBXNativeTarget "nameRunner" */;
+			buildConfigurationList = D5B6AA372FBED130007C7872 /* Build configuration list for PBXNativeTarget "LoopTogetherUITests" */;
+			buildPhases = (
+				D5B6AA2B2FBED130007C7872 /* Sources */,
+				D5B6AA2C2FBED130007C7872 /* Frameworks */,
+				D5B6AA2D2FBED130007C7872 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D5B6AA362FBED130007C7872 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D5B6AA302FBED130007C7872 /* LoopTogetherUITests */,
+			);
+			name = LoopTogetherUITests;
+			packageProductDependencies = (
+			);
+			productName = LoopTogetherUITests;
+			productReference = D5B6AA2F2FBED130007C7872 /* LoopTogetherUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D5E4277C2F94654D0009EA12 /* LoopTogether */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D5E427882F94654E0009EA12 /* Build configuration list for PBXNativeTarget "LoopTogether" */;
 			buildPhases = (
 				D5E427792F94654D0009EA12 /* Sources */,
 				D5E4277A2F94654D0009EA12 /* Frameworks */,
@@ -237,7 +282,7 @@
 			fileSystemSynchronizedGroups = (
 				D5E4277F2F94654D0009EA12 /* nameRunner */,
 			);
-			name = nameRunner;
+			name = LoopTogether;
 			packageProductDependencies = (
 				D5B881E72F960C3D004EC7EC /* FirebaseAuth */,
 				D5B881E92F960C3D004EC7EC /* FirebaseCore */,
@@ -246,7 +291,7 @@
 				D5B881F22F961498004EC7EC /* GoogleSignInSwift */,
 			);
 			productName = nameRunner;
-			productReference = D5E4277D2F94654D0009EA12 /* nameRunner.app */;
+			productReference = D5E4277D2F94654D0009EA12 /* LoopTogether.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -264,6 +309,10 @@
 					};
 					D5B6A7032F987356007C7872 = {
 						CreatedOnToolsVersion = 26.4.1;
+					};
+					D5B6AA2E2FBED130007C7872 = {
+						CreatedOnToolsVersion = 26.4.1;
+						TestTargetID = D5E4277C2F94654D0009EA12;
 					};
 					D5E4277C2F94654D0009EA12 = {
 						CreatedOnToolsVersion = 26.4.1;
@@ -288,9 +337,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D5E4277C2F94654D0009EA12 /* nameRunner */,
+				D5E4277C2F94654D0009EA12 /* LoopTogether */,
 				D5B6A6D92F970445007C7872 /* LoopTogetherWatch Watch App */,
 				D5B6A7032F987356007C7872 /* LoopTogetherWidgetExtension */,
+				D5B6AA2E2FBED130007C7872 /* LoopTogetherUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -304,6 +354,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D5B6A7022F987356007C7872 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5B6AA2D2FBED130007C7872 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -334,6 +391,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5B6AA2B2FBED130007C7872 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5E427792F94654D0009EA12 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -353,6 +417,11 @@
 			isa = PBXTargetDependency;
 			target = D5B6A7032F987356007C7872 /* LoopTogetherWidgetExtension */;
 			targetProxy = D5B6A7142F987358007C7872 /* PBXContainerItemProxy */;
+		};
+		D5B6AA362FBED130007C7872 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D5E4277C2F94654D0009EA12 /* LoopTogether */;
+			targetProxy = D5B6AA352FBED130007C7872 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -495,6 +564,51 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D5B6AA382FBED130007C7872 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XYL5CEK26;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.LoopTogetherUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LoopTogether;
+			};
+			name = Debug;
+		};
+		D5B6AA392FBED130007C7872 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4XYL5CEK26;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.nameRunner.LoopTogetherUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LoopTogether;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -649,9 +763,9 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.3.2;
+				MARKETING_VERSION = 1.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = LoopTogether;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -703,9 +817,9 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.3.2;
+				MARKETING_VERSION = 1.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Khawar.LoopTogether;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = LoopTogether;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -742,6 +856,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		D5B6AA372FBED130007C7872 /* Build configuration list for PBXNativeTarget "LoopTogetherUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D5B6AA382FBED130007C7872 /* Debug */,
+				D5B6AA392FBED130007C7872 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D5E427782F94654D0009EA12 /* Build configuration list for PBXProject "nameRunner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -751,7 +874,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D5E427882F94654E0009EA12 /* Build configuration list for PBXNativeTarget "nameRunner" */ = {
+		D5E427882F94654E0009EA12 /* Build configuration list for PBXNativeTarget "LoopTogether" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D5E427892F94654E0009EA12 /* Debug */,

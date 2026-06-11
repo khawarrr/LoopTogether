@@ -16,6 +16,9 @@ final class AppSettings {
     var runnerAvatar: String = UserDefaults.standard.string(forKey: "runnerAvatar") ?? "male" {
         didSet { UserDefaults.standard.set(runnerAvatar, forKey: "runnerAvatar") }
     }
+    var monthlyGoalMiles: Double = UserDefaults.standard.double(forKey: "monthlyGoalMiles") {
+        didSet { UserDefaults.standard.set(monthlyGoalMiles, forKey: "monthlyGoalMiles") }
+    }
 
     var distanceUnit: String { useMetric ? "km" : "mi" }
     var paceUnit: String { useMetric ? "/km" : "/mi" }
