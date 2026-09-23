@@ -6,6 +6,8 @@
 import Foundation
 import FirebaseAuth
 import GoogleSignIn
+import AuthenticationServices
+import CryptoKit
 import UIKit
 
 @Observable
@@ -47,7 +49,6 @@ final class AuthManager {
 
     func deleteAccount() async throws {
         guard let user = currentUser else { return }
-        // Best-effort Firestore cleanup — don't block deletion if it fails
         try? await FirestoreService.deleteUserData(uid: user.uid)
         try await user.delete()
         GIDSignIn.sharedInstance.signOut()
@@ -67,7 +68,6 @@ final class AuthManager {
         request.displayName = name.trimmingCharacters(in: .whitespaces)
         try await request.commitChanges()
         try await Auth.auth().currentUser?.reload()
-        // Nil-then-reassign forces @Observable to detect the change
         currentUser = nil
         currentUser = Auth.auth().currentUser
     }
@@ -99,6 +99,29 @@ final class AuthManager {
         let firebaseResult = try await Auth.auth().signIn(with: credential)
         currentUser = firebaseResult.user
     }
+
+    // MARK: - Apple
+
+    @MainActor
+    func signInWithApple(credential: ASAuthorizationAppleIDCredential, nonce: String) async throws {
+        guard let tokenData = credential.identityToken,
+              let idToken = String(data: tokenData, encoding: .utf8) else {
+            throw AppleSignInError.missingToken
+        }
+        let firebaseCredential = OAuthProvider.appleCredential(
+            withIDToken: idToken,
+            rawNonce: nonce,
+            fullName: credential.fullName
+        )
+        let result = try await Auth.auth().signIn(with: firebaseCredential)
+        currentUser = result.user
+        if let fullName = credential.fullName,
+           let given = fullName.givenName, !given.isEmpty,
+           currentUser?.displayName?.isEmpty ?? true {
+            let name = [given, fullName.familyName].compactMap { $0 }.joined(separator: " ")
+            try? await updateDisplayName(name)
+        }
+    }
 }
 
 enum GoogleSignInError: LocalizedError {
@@ -110,4 +133,9 @@ enum GoogleSignInError: LocalizedError {
         case .missingToken: return "Google Sign-In failed. Please try again."
         }
     }
+}
+
+enum AppleSignInError: LocalizedError {
+    case missingToken
+    var errorDescription: String? { "Apple Sign-In failed. Please try again." }
 }

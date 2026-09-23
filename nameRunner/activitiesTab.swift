@@ -56,7 +56,11 @@ struct ActivitiesTab: View {
                         }
 
                         Button {
-                            showBuildRoute = true
+                            if authManager.isSignedIn {
+                                showBuildRoute = true
+                            } else {
+                                showAuth = true
+                            }
                         } label: {
                             Label("Build Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
                         }

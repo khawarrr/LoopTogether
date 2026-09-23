@@ -4,6 +4,8 @@
 //
 
 import SwiftUI
+import AuthenticationServices
+import CryptoKit
 
 struct AuthView: View {
     @Environment(AuthManager.self) private var authManager
@@ -16,6 +18,7 @@ struct AuthView: View {
     @State private var confirmPassword = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var currentNonce: String?
 
     var body: some View {
         NavigationStack {
@@ -26,7 +29,7 @@ struct AuthView: View {
                         Image(systemName: "figure.run.circle.fill")
                             .font(.system(size: 72))
                             .foregroundStyle(.blue)
-                        Text("nameRunner")
+                        Text("LoopTogether")
                             .font(.largeTitle.bold())
                         Text(isSignUp ? "Create your account" : "Welcome back")
                             .font(.subheadline)
@@ -106,6 +109,34 @@ struct AuthView: View {
                     }
                     .padding(.horizontal)
 
+                    // Sign in with Apple
+                    SignInWithAppleButton(.continue) { request in
+                        let nonce = randomNonceString()
+                        currentNonce = nonce
+                        request.requestedScopes = [.fullName, .email]
+                        request.nonce = sha256(nonce)
+                    } onCompletion: { result in
+                        switch result {
+                        case .success(let auth):
+                            guard let appleCredential = auth.credential as? ASAuthorizationAppleIDCredential,
+                                  let nonce = currentNonce else { return }
+                            Task {
+                                do {
+                                    try await authManager.signInWithApple(credential: appleCredential, nonce: nonce)
+                                    dismiss()
+                                } catch {
+                                    errorMessage = error.localizedDescription
+                                }
+                            }
+                        case .failure(let error):
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                    .signInWithAppleButtonStyle(.black)
+                    .frame(height: 50)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+
                     // Google sign-in
                     Button {
                         Task {
@@ -180,4 +211,18 @@ struct AuthView: View {
             errorMessage = error.localizedDescription
         }
     }
+}
+
+// MARK: - Nonce helpers
+
+private func randomNonceString(length: Int = 32) -> String {
+    var randomBytes = [UInt8](repeating: 0, count: length)
+    _ = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
+    let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+    return String(randomBytes.map { charset[Int($0) % charset.count] })
+}
+
+private func sha256(_ input: String) -> String {
+    let data = SHA256.hash(data: Data(input.utf8))
+    return data.compactMap { String(format: "%02x", $0) }.joined()
 }
