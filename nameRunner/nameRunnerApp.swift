@@ -46,6 +46,7 @@ struct nameRunnerApp: App {
                     phoneSession.configure(runStore: runStore, authManager: authManager)
                     if authManager.isSignedIn {
                         runStore.loadHistory()
+                        runStore.loadSavedRoutes()
                     }
                 }
                 .onChange(of: runStore.activeSession?.id) { _, id in
@@ -71,10 +72,12 @@ struct nameRunnerApp: App {
                 .onChange(of: authManager.currentUser?.uid) { _, uid in
                     if let uid {
                         runStore.loadHistory()
+                        runStore.loadSavedRoutes()
                         let name = authManager.displayName ?? authManager.currentUser?.email ?? "Runner"
                         Task { try? await FriendsService.ensureProfile(uid: uid, displayName: name) }
                     } else {
                         runStore.clearHistory()
+                        runStore.savedRoutes = []
                     }
                 }
         }

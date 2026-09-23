@@ -12,8 +12,8 @@ LoopTogether is a running and walking app built for people who stay motivated wi
 
 ## Features
 
-- 🗺️ **Route tracking** — GPS tracking with turn-by-turn voice guidance
-- 🧭 **Custom route builder** — drop waypoints to design your own loops
+- 🗺️ **Route tracking** — GPS tracking with on-screen turn-by-turn directions
+- 🧭 **Custom route builder** — drop waypoints to design your own loops, and save them to run again
 - 📊 **Real-time stats** — distance, pace, calories, and duration as you run
 - 👟 **Friend competitions** — daily and weekly leaderboards with your friends
 - 🎯 **Daily challenges** — 1-mile runs, 10,000 steps, 5K completion, 20-minute activity

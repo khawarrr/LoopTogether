@@ -51,6 +51,12 @@ struct FirestoreService {
             try await doc.reference.delete()
         }
         try await db.collection("users").document(uid).delete()
+        let routesSnapshot = try await db
+            .collection("users").document(uid)
+            .collection("savedRoutes").getDocuments()
+        for doc in routesSnapshot.documents {
+            try await doc.reference.delete()
+        }
     }
 
     static func deleteRun(id: UUID, for uid: String) async throws {
@@ -58,6 +64,63 @@ struct FirestoreService {
             .collection("users").document(uid)
             .collection("runs").document(id.uuidString)
             .delete()
+    }
+
+    // MARK: - Saved routes
+
+    static func saveRoute(_ route: SavedRoute, for uid: String) async throws {
+        let data: [String: Any] = [
+            "id": route.id.uuidString,
+            "name": route.name,
+            "waypoints": route.waypoints.map { ["lat": $0.latitude, "lng": $0.longitude] },
+            "distanceMeters": route.distanceMeters,
+            "createdAt": Timestamp(date: route.createdAt)
+        ]
+        try await db
+            .collection("users").document(uid)
+            .collection("savedRoutes").document(route.id.uuidString)
+            .setData(data)
+    }
+
+    static func loadSavedRoutes(for uid: String) async throws -> [SavedRoute] {
+        let snapshot = try await db
+            .collection("users").document(uid)
+            .collection("savedRoutes")
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+        return snapshot.documents.compactMap(makeSavedRoute)
+    }
+
+    static func deleteSavedRoute(id: UUID, for uid: String) async throws {
+        try await db
+            .collection("users").document(uid)
+            .collection("savedRoutes").document(id.uuidString)
+            .delete()
+    }
+
+    private static func makeSavedRoute(from doc: QueryDocumentSnapshot) -> SavedRoute? {
+        let d = doc.data()
+        guard
+            let idStr = d["id"] as? String, let id = UUID(uuidString: idStr),
+            let name = d["name"] as? String,
+            let distance = d["distanceMeters"] as? Double,
+            let ts = d["createdAt"] as? Timestamp,
+            let points = d["waypoints"] as? [[String: Double]]
+        else { return nil }
+
+        let waypoints = points.compactMap { p -> CLLocationCoordinate2D? in
+            guard let lat = p["lat"], let lng = p["lng"] else { return nil }
+            return CLLocationCoordinate2D(latitude: lat, longitude: lng)
+        }
+        guard waypoints.count >= 2 else { return nil }
+
+        return SavedRoute(
+            id: id,
+            name: name,
+            waypoints: waypoints,
+            distanceMeters: distance,
+            createdAt: ts.dateValue()
+        )
     }
 
     private static func makeRun(from doc: QueryDocumentSnapshot) -> CompletedRun? {

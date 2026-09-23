@@ -218,6 +218,24 @@ struct CompletedRun: Identifiable {
     }
 }
 
+// MARK: - Saved route
+
+/// A route the user built by hand and saved for reuse. Only the waypoints
+/// are stored; the walking legs between them are recalculated on load,
+/// since `MKRoute` (needed for turn-by-turn) can't be serialized.
+struct SavedRoute: Identifiable {
+    let id: UUID
+    let name: String
+    let waypoints: [CLLocationCoordinate2D]
+    let distanceMeters: Double
+    let createdAt: Date
+}
+
+enum SavedRouteError: LocalizedError {
+    case notSignedIn
+    var errorDescription: String? { "Sign in to save routes." }
+}
+
 // MARK: - Store
 
 /// App-level store that holds the active session and completed run history.
@@ -226,6 +244,7 @@ struct CompletedRun: Identifiable {
 final class RunStore {
     var activeSession: RunSession?
     var history: [CompletedRun] = []
+    var savedRoutes: [SavedRoute] = []
     var lastCompletedRun: CompletedRun?
     var shouldShowCompletionCelebration: Bool = false
     var isLoadingHistory: Bool = false
@@ -284,6 +303,42 @@ final class RunStore {
         history.removeAll { $0.id == id }
         if let uid = authManager.currentUser?.uid {
             Task { try? await FirestoreService.deleteRun(id: id, for: uid) }
+        }
+    }
+
+    // MARK: Saved routes
+
+    /// Fetches the signed-in user's saved routes from Firestore.
+    func loadSavedRoutes() {
+        guard let uid = authManager.currentUser?.uid else { return }
+        Task { @MainActor in
+            if let routes = try? await FirestoreService.loadSavedRoutes(for: uid) {
+                savedRoutes = routes
+            }
+        }
+    }
+
+    /// Saves a hand-built route. Awaits the Firestore write so the caller
+    /// can surface failures (e.g. network or permission errors).
+    @MainActor
+    func saveRoute(name: String, waypoints: [CLLocationCoordinate2D], distanceMeters: Double) async throws -> SavedRoute {
+        guard let uid = authManager.currentUser?.uid else { throw SavedRouteError.notSignedIn }
+        let route = SavedRoute(
+            id: UUID(),
+            name: name,
+            waypoints: waypoints,
+            distanceMeters: distanceMeters,
+            createdAt: Date()
+        )
+        try await FirestoreService.saveRoute(route, for: uid)
+        savedRoutes.insert(route, at: 0)
+        return route
+    }
+
+    func deleteSavedRoute(id: UUID) {
+        savedRoutes.removeAll { $0.id == id }
+        if let uid = authManager.currentUser?.uid {
+            Task { try? await FirestoreService.deleteSavedRoute(id: id, for: uid) }
         }
     }
 

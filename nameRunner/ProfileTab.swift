@@ -24,6 +24,11 @@ struct ProfileTab: View {
     }
     private var totalRuns: Int { runStore.history.count }
 
+    /// Marketing version from the bundle (MARKETING_VERSION in build settings).
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -58,11 +63,6 @@ struct ProfileTab: View {
                         Label("Notifications", systemImage: "bell")
                     }
                     NavigationLink {
-                        VoiceGuidanceSettingsView()
-                    } label: {
-                        Label("Voice Guidance", systemImage: "speaker.wave.2")
-                    }
-                    NavigationLink {
                         RunnerAvatarSettingsView()
                     } label: {
                         Label("Runner Icon", systemImage: "figure.run")
@@ -86,7 +86,7 @@ struct ProfileTab: View {
                     HStack {
                         Label("Version", systemImage: "info.circle")
                         Spacer()
-                        Text("1.0")
+                        Text(appVersion)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -241,23 +241,6 @@ private struct UnitsSettingsView: View {
             }
         }
         .navigationTitle("Units")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct VoiceGuidanceSettingsView: View {
-    @Environment(AppSettings.self) private var settings
-
-    var body: some View {
-        @Bindable var s = settings
-        Form {
-            Section {
-                Toggle("Voice Guidance", isOn: $s.voiceGuidanceEnabled)
-            } footer: {
-                Text("When enabled, the app announces distance milestones during your run.")
-            }
-        }
-        .navigationTitle("Voice Guidance")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import AVFoundation
 internal import _LocationEssentials
 internal import MapKit
 
@@ -16,15 +15,10 @@ internal import MapKit
 ///     regardless of which tab is visible.
 ///  2. Auto-completes the run when the user arrives at the finish, and
 ///     shows the celebration sheet.
-///  3. Drives voice turn-by-turn announcements for route-based runs, so the
-///     user hears directions whether they're looking at the active run
-///     detail or the focus navigation view.
 struct RootTabView: View {
     @Environment(RunStore.self) private var runStore
     @Environment(LocationManager.self) private var locationManager
-    @Environment(AppSettings.self) private var settings
 
-    @State private var announcer = SpeechAnnouncer()
     @State private var showDetailsAfterCelebration = false
 
     var body: some View {
@@ -51,10 +45,6 @@ struct RootTabView: View {
                     Label("Profile", systemImage: "person.crop.circle.fill")
                 }
         }
-        .environment(announcer)
-        .onChange(of: settings.voiceGuidanceEnabled) { _, enabled in
-            announcer.isMuted = !enabled
-        }
         // Central location-update pump. Every GPS update is forwarded to the
         // active session (if any), so breadcrumb tracking is not tied to any
         // particular view being on screen.
@@ -67,34 +57,6 @@ struct RootTabView: View {
             // Gated on `hasArrived` to fire exactly once per session.
             if !session.isFreeRun, session.hasArrived {
                 runStore.completeActiveRunAtFinish()
-            }
-        }
-        // Speak the initial heading when a new route-based run starts.
-        .onChange(of: runStore.activeSession?.id) { _, newId in
-            guard let session = runStore.activeSession,
-                  newId != nil,
-                  !session.isFreeRun,
-                  let first = session.route?.steps.first?.instructions,
-                  !first.isEmpty else { return }
-            announcer.announceIfNew(
-                key: "initial-\(session.id.uuidString)",
-                text: first
-            )
-        }
-        // Speak the upcoming turn as the user approaches it.
-        // Arrival is announced once, via the auto-complete flow below.
-        .onChange(of: runStore.activeSession?.progress?.distanceToNextTurn) { _, _ in
-            guard let session = runStore.activeSession,
-                  !session.isFreeRun,
-                  !session.isPaused,
-                  let progress = session.progress else { return }
-
-            if !progress.hasArrived,
-               progress.distanceToNextTurn > 0,
-               progress.distanceToNextTurn < 60,
-               !progress.upcomingInstruction.isEmpty {
-                let key = "step-\(session.id.uuidString)-\(progress.currentStepIndex)"
-                announcer.announceIfNew(key: key, text: progress.upcomingInstruction)
             }
         }
         // Celebration sheet — triggered by auto-completion.
@@ -114,13 +76,6 @@ struct RootTabView: View {
                         runStore.shouldShowCompletionCelebration = false
                     }
                 )
-                .onAppear {
-                    // Congratulate the runner out loud if sound is enabled.
-                    announcer.announceIfNew(
-                        key: "celebration-\(run.id.uuidString)",
-                        text: "Great run! Well done!"
-                    )
-                }
             }
         }
         // Detail view launched from "View Details" in the celebration sheet.
@@ -138,52 +93,6 @@ struct RootTabView: View {
                 }
             }
         }
-    }
-}
-
-// MARK: - Voice announcer
-
-/// Speaks upcoming turn instructions. Deduplicates by a caller-provided key so
-/// each announcement fires exactly once per key (even across view transitions).
-/// Observable so that views can bind to the mute toggle.
-@Observable
-final class SpeechAnnouncer {
-    private let synthesizer = AVSpeechSynthesizer()
-    private var lastKey: String?
-
-    /// When `true`, `announceIfNew` silently records the key (so it won't
-    /// replay when unmuted) but doesn't speak. Any in-flight utterance is
-    /// also stopped when the user mutes mid-announcement.
-    var isMuted: Bool = !(UserDefaults.standard.object(forKey: "voiceGuidanceEnabled") as? Bool ?? true) {
-        didSet {
-            UserDefaults.standard.set(!isMuted, forKey: "voiceGuidanceEnabled")
-            if isMuted {
-                synthesizer.stopSpeaking(at: .immediate)
-            }
-        }
-    }
-
-    func announceIfNew(key: String, text: String) {
-        guard key != lastKey, !text.isEmpty else { return }
-        lastKey = key
-
-        // Still update lastKey when muted, so re-enabling audio doesn't
-        // trigger a flood of past turns.
-        guard !isMuted else { return }
-
-        // Duck other audio (music/podcasts) so prompts cut through.
-        let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(
-            .playback,
-            mode: .voicePrompt,
-            options: [.duckOthers, .mixWithOthers]
-        )
-        try? session.setActive(true, options: [])
-
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.95
-        synthesizer.speak(utterance)
     }
 }
 

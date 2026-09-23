@@ -11,6 +11,7 @@ struct BuildRouteView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(RunStore.self) private var runStore
     @Environment(LocationManager.self) private var locationManager
+    @Environment(AppSettings.self) private var settings
 
     @State private var waypoints: [CLLocationCoordinate2D] = []
     @State private var legs: [MKRoute] = []
@@ -24,8 +25,20 @@ struct BuildRouteView: View {
     )
     @State private var hasCentered = false
 
+    @State private var showSavedRoutes = false
+    @State private var showSavePrompt = false
+    @State private var routeName = ""
+    @State private var isSaving = false
+    /// ID of the saved route currently on the map. Cleared on any edit so
+    /// the Save button re-enables once the route diverges from what's saved.
+    @State private var savedRouteID: UUID?
+
+    private var totalMeters: Double {
+        legs.reduce(0) { $0 + $1.distance }
+    }
+
     private var totalMiles: Double {
-        legs.reduce(0) { $0 + $1.distance } / 1609.34
+        totalMeters / 1609.34
     }
 
     var body: some View {
@@ -90,8 +103,18 @@ struct BuildRouteView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Undo") { removeLastWaypoint() }
-                        .disabled(waypoints.isEmpty)
+                        .disabled(waypoints.isEmpty || isCalculating)
                 }
+            }
+            .sheet(isPresented: $showSavedRoutes) {
+                SavedRoutesView(onSelect: loadSavedRoute)
+            }
+            .alert("Save Route", isPresented: $showSavePrompt) {
+                TextField("Route name", text: $routeName)
+                Button("Save", action: saveRoute)
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Name this route so you can run it again later.")
             }
             .onAppear { centerOnUserIfNeeded() }
             .onChange(of: locationManager.currentLocation?.timestamp) { _, _ in
@@ -108,6 +131,19 @@ struct BuildRouteView: View {
                 Text("Tap the map to place waypoints")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                if !runStore.savedRoutes.isEmpty {
+                    Button {
+                        showSavedRoutes = true
+                    } label: {
+                        Label("Saved Routes (\(runStore.savedRoutes.count))", systemImage: "bookmark.fill")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                    }
+                    .background(Color(.systemGray5))
+                    .foregroundColor(.primary)
+                    .cornerRadius(10)
+                }
             } else if isCalculating {
                 HStack(spacing: 8) {
                     ProgressView()
@@ -150,14 +186,40 @@ struct BuildRouteView: View {
             }
 
             if !waypoints.isEmpty {
-                Button(action: clearAll) {
-                    Text("Clear All")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                HStack(spacing: 10) {
+                    if !legs.isEmpty {
+                        Button {
+                            routeName = ""
+                            showSavePrompt = true
+                        } label: {
+                            Group {
+                                if isSaving {
+                                    ProgressView()
+                                } else if savedRouteID != nil {
+                                    Label("Saved", systemImage: "bookmark.fill")
+                                } else {
+                                    Label("Save Route", systemImage: "bookmark")
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                        }
+                        .background(Color(.systemGray5))
+                        .foregroundColor(.primary)
+                        .cornerRadius(10)
+                        .disabled(isSaving || isCalculating || savedRouteID != nil)
+                    }
+
+                    Button(action: clearAll) {
+                        Text("Clear All")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                    }
+                    .background(Color(.systemGray5))
+                    .foregroundColor(.primary)
+                    .cornerRadius(10)
+                    .disabled(isCalculating)
                 }
-                .background(Color(.systemGray5))
-                .foregroundColor(.primary)
-                .cornerRadius(10)
             }
         }
         .padding()
@@ -189,7 +251,11 @@ struct BuildRouteView: View {
     }
 
     private func addWaypoint(_ coord: CLLocationCoordinate2D) {
+        // Ignore taps while a leg is still calculating so legs stay in
+        // the same order as their waypoints.
+        guard !isCalculating else { return }
         errorMessage = nil
+        savedRouteID = nil
 
         // Auto-insert current location as the starting waypoint on first tap.
         if waypoints.isEmpty, let userLoc = locationManager.currentLocation?.coordinate {
@@ -205,14 +271,8 @@ struct BuildRouteView: View {
         isCalculating = true
 
         Task {
-            let request = MKDirections.Request()
-            request.source = MKMapItem(placemark: MKPlacemark(coordinate: from))
-            request.destination = MKMapItem(placemark: MKPlacemark(coordinate: to))
-            request.transportType = .walking
-
             do {
-                let response = try await MKDirections(request: request).calculate()
-                if let route = response.routes.first {
+                if let route = try await walkingRoute(from: from, to: to) {
                     legs.append(route)
                 } else {
                     errorMessage = "No walking route found between those points."
@@ -226,17 +286,73 @@ struct BuildRouteView: View {
         }
     }
 
+    private func walkingRoute(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) async throws -> MKRoute? {
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: from))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: to))
+        request.transportType = .walking
+        return try await MKDirections(request: request).calculate().routes.first
+    }
+
     private func removeLastWaypoint() {
         guard !waypoints.isEmpty else { return }
         waypoints.removeLast()
         if !legs.isEmpty { legs.removeLast() }
         errorMessage = nil
+        savedRouteID = nil
     }
 
     private func clearAll() {
         waypoints.removeAll()
         legs.removeAll()
         errorMessage = nil
+        savedRouteID = nil
+    }
+
+    private func saveRoute() {
+        let trimmed = routeName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = trimmed.isEmpty ? "\(settings.formatDistance(totalMeters)) route" : trimmed
+        isSaving = true
+
+        Task {
+            do {
+                let saved = try await runStore.saveRoute(
+                    name: name,
+                    waypoints: waypoints,
+                    distanceMeters: totalMeters
+                )
+                savedRouteID = saved.id
+            } catch {
+                errorMessage = "Couldn't save route. Check your connection and try again."
+            }
+            isSaving = false
+        }
+    }
+
+    /// Replaces whatever is on the map with a saved route, recalculating
+    /// the walking leg between each pair of waypoints.
+    private func loadSavedRoute(_ route: SavedRoute) {
+        clearAll()
+        waypoints = route.waypoints
+        isCalculating = true
+
+        Task {
+            var loaded: [MKRoute] = []
+            for (from, to) in zip(route.waypoints, route.waypoints.dropFirst()) {
+                guard let leg = try? await walkingRoute(from: from, to: to) else { break }
+                loaded.append(leg)
+            }
+
+            if loaded.count == route.waypoints.count - 1 {
+                legs = loaded
+                savedRouteID = route.id
+                frameFullRoute()
+            } else {
+                waypoints.removeAll()
+                errorMessage = "Couldn't load \"\(route.name)\". Check your connection and try again."
+            }
+            isCalculating = false
+        }
     }
 
     private func startRun() {

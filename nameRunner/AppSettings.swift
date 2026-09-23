@@ -10,9 +10,6 @@ final class AppSettings {
     var useMetric: Bool = UserDefaults.standard.bool(forKey: "useMetric") {
         didSet { UserDefaults.standard.set(useMetric, forKey: "useMetric") }
     }
-    var voiceGuidanceEnabled: Bool = (UserDefaults.standard.object(forKey: "voiceGuidanceEnabled") as? Bool) ?? true {
-        didSet { UserDefaults.standard.set(voiceGuidanceEnabled, forKey: "voiceGuidanceEnabled") }
-    }
     var runnerAvatar: String = UserDefaults.standard.string(forKey: "runnerAvatar") ?? "male" {
         didSet { UserDefaults.standard.set(runnerAvatar, forKey: "runnerAvatar") }
     }

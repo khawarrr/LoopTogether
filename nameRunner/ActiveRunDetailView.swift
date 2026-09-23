@@ -22,7 +22,6 @@ struct ActiveRunDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(RunStore.self) private var runStore
     @Environment(LocationManager.self) private var locationManager
-    @Environment(SpeechAnnouncer.self) private var announcer
     @Environment(AppSettings.self) private var settings
 
     @State private var position: MapCameraPosition
@@ -55,8 +54,6 @@ struct ActiveRunDetailView: View {
     }
 
     var body: some View {
-        @Bindable var announcer = announcer
-
         NavigationStack {
             VStack(spacing: 0) {
                 mapView
@@ -70,20 +67,6 @@ struct ActiveRunDetailView: View {
                         dismiss()
                     } label: {
                         Label("Back", systemImage: "chevron.down")
-                    }
-                }
-                if !session.isFreeRun {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            announcer.isMuted.toggle()
-                        } label: {
-                            Image(systemName: announcer.isMuted
-                                  ? "speaker.slash.fill"
-                                  : "speaker.wave.2.fill")
-                        }
-                        .accessibilityLabel(
-                            announcer.isMuted ? "Unmute directions" : "Mute directions"
-                        )
                     }
                 }
             }

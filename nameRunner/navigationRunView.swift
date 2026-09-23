@@ -10,14 +10,12 @@ internal import MapKit
 import CoreLocation
 
 /// Full-screen "focus" navigation. A map that follows the user's heading,
-/// with a prominent turn banner. Voice announcements are handled centrally
-/// by `RootTabView`.
+/// with a prominent turn banner.
 struct NavigationRunView: View {
     let session: RunSession
     let locationManager: LocationManager
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(SpeechAnnouncer.self) private var announcer
 
     @State private var position: MapCameraPosition
     @State private var showTurnList = false
@@ -46,8 +44,6 @@ struct NavigationRunView: View {
     }
 
     var body: some View {
-        @Bindable var announcer = announcer
-
         ZStack {
             Map(position: $position) {
                 UserAnnotation()
@@ -135,9 +131,7 @@ struct NavigationRunView: View {
     }
 
     private var bottomBar: some View {
-        @Bindable var announcer = announcer
-
-        return HStack(spacing: 12) {
+        HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(Self.distanceFormatter.string(fromDistance: session.progress?.remainingDistance ?? 0))
                     .font(.title3.bold())
@@ -148,23 +142,6 @@ struct NavigationRunView: View {
             }
 
             Spacer()
-
-            // Mute toggle
-            Button {
-                announcer.isMuted.toggle()
-            } label: {
-                Image(systemName: announcer.isMuted
-                      ? "speaker.slash.fill"
-                      : "speaker.wave.2.fill")
-                    .font(.title3)
-                    .frame(width: 44, height: 44)
-            }
-            .background(Color(.systemGray5))
-            .foregroundColor(announcer.isMuted ? .red : .primary)
-            .clipShape(Circle())
-            .accessibilityLabel(
-                announcer.isMuted ? "Unmute directions" : "Mute directions"
-            )
 
             Button {
                 showTurnList = true

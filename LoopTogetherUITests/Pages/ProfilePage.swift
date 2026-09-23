@@ -9,7 +9,6 @@ private enum ProfilePageConstants {
     static let navBarLabel        = "Profile"
     static let tabLabel           = "Profile"
     static let unitsLabel         = "Units"
-    static let voiceGuidanceLabel = "Voice Guidance"
     static let runnerIconLabel    = "Runner Icon"
     static let monthlyGoalLabel   = "Monthly Goal"
     static let signOutLabel       = "Sign Out"
@@ -21,7 +20,6 @@ struct ProfilePage {
     // MARK: - Elements
     var navBar:           XCUIElement { app.navigationBars[ProfilePageConstants.navBarLabel] }
     var unitsRow:         XCUIElement { app.buttons[ProfilePageConstants.unitsLabel] }
-    var voiceGuidanceRow: XCUIElement { app.buttons[ProfilePageConstants.voiceGuidanceLabel] }
     var runnerIconRow:    XCUIElement { app.buttons[ProfilePageConstants.runnerIconLabel] }
     var monthlyGoalRow:   XCUIElement { app.buttons[ProfilePageConstants.monthlyGoalLabel] }
     var signOutButton:    XCUIElement { app.buttons[ProfilePageConstants.signOutLabel] }
@@ -47,7 +45,6 @@ struct ProfilePage {
     func verifySettingsRowsExist() throws -> Self {
         try XCTContext.runActivity(named: "Verify settings rows exist") { _ in
             XCTAssertTrue(unitsRow.exists, "Units row missing")
-            XCTAssertTrue(voiceGuidanceRow.exists, "Voice Guidance row missing")
             XCTAssertTrue(runnerIconRow.exists, "Runner Icon row missing")
             XCTAssertTrue(monthlyGoalRow.exists, "Monthly Goal row missing")
         }
