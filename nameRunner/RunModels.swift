@@ -129,6 +129,9 @@ final class RunSession: Identifiable {
             let next = pendingLegs.removeFirst()
             currentLegIndex += 1
             progress = RouteProgress(route: next)
+            // Match the new leg right away so the banner shows its first
+            // turn rather than MapKit's "Start on …" placeholder.
+            progress?.update(userLocation: userLocation)
         }
     }
 
@@ -172,6 +175,62 @@ final class RunSession: Identifiable {
     /// Always false for free runs.
     var hasArrived: Bool {
         progress?.hasArrived ?? false
+    }
+
+    // MARK: Turn-by-turn
+
+    /// The next maneuver for the turn banner, looking across legs. Every leg
+    /// ends with MapKit's "Arrive at the destination" step, but for any leg
+    /// except the last that's just a waypoint — so instead of announcing the
+    /// finish we describe the turn there, or look ahead to the next real
+    /// maneuver if the route carries straight on. `nil` for free runs.
+    var nextManeuver: (instruction: String, distance: CLLocationDistance)? {
+        guard let progress else { return nil }
+        guard progress.isOnFinalStep, !pendingLegs.isEmpty else {
+            return (progress.upcomingInstruction, progress.distanceToNextTurn)
+        }
+
+        var distance = progress.distanceToNextTurn
+        var incoming = progress.route
+        for (index, leg) in pendingLegs.enumerated() {
+            if let turn = Self.turnInstruction(from: incoming, to: leg) {
+                return (turn, distance)
+            }
+            let isFinalLeg = index == pendingLegs.count - 1
+            for (i, step) in leg.steps.enumerated() {
+                distance += step.distance
+                // Step 0 is "Start on …" at the waypoint itself; a leg's last
+                // step is only a real arrival on the final leg.
+                if i > 0, i < leg.steps.count - 1 || isFinalLeg {
+                    return (step.instructions, distance)
+                }
+            }
+            incoming = leg
+        }
+        return ("Arriving at finish", distance)
+    }
+
+    /// Describes the turn at the waypoint between two legs from the change
+    /// in heading, or `nil` if the route carries roughly straight on.
+    private static func turnInstruction(from incoming: MKRoute, to outgoing: MKRoute) -> String? {
+        guard let arriving = incoming.polyline.headingAtEnd(),
+              let leaving = outgoing.polyline.headingAtStart() else { return nil }
+        // Signed change in heading, -180...180; positive is a right turn.
+        let delta = (leaving - arriving + 540).truncatingRemainder(dividingBy: 360) - 180
+
+        guard abs(delta) >= 35 else { return nil }
+        guard abs(delta) < 135 else { return "Turn around" }
+
+        // If the waypoint sits just before a corner, MapKit's own first
+        // maneuver ("Take a left onto …") already describes this turn with
+        // the right street — let the caller look ahead to it instead.
+        if outgoing.steps.count > 1, outgoing.steps[1].distance < 25 { return nil }
+
+        let turn = delta > 0 ? "Turn right" : "Turn left"
+        // MapKit's first step reads "Start on <street>"; reuse the street name.
+        let start = outgoing.steps.first?.instructions ?? ""
+        guard start.hasPrefix("Start on ") else { return turn }
+        return "\(turn) onto \(start.dropFirst("Start on ".count))"
     }
 }
 

@@ -228,20 +228,20 @@ struct ActiveRunDetailView: View {
 
     @ViewBuilder
     private var turnBanner: some View {
-        if !session.isFreeRun, let progress = session.progress {
+        if !session.isFreeRun, let maneuver = session.nextManeuver {
             HStack(alignment: .center, spacing: 12) {
-                Image(systemName: iconName(for: progress.upcomingInstruction))
+                Image(systemName: iconName(for: maneuver.instruction))
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(width: 40, height: 40)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    if !progress.hasArrived, progress.distanceToNextTurn > 0 {
-                        Text("In \(Self.distanceFormatter.string(fromDistance: progress.distanceToNextTurn))")
+                    if !session.hasArrived, maneuver.distance > 0 {
+                        Text("In \(Self.distanceFormatter.string(fromDistance: maneuver.distance))")
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.85))
                     }
-                    Text(progress.upcomingInstruction.isEmpty ? "Starting…" : progress.upcomingInstruction)
+                    Text(maneuver.instruction.isEmpty ? "Starting…" : maneuver.instruction)
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(.white)
                         .lineLimit(2)
@@ -368,7 +368,7 @@ struct ActiveRunDetailView: View {
     private func iconName(for instructions: String) -> String {
         let text = instructions.lowercased()
         if text.contains("arriv") || text.contains("destination") { return "flag.checkered" }
-        if text.contains("u-turn") || text.contains("u turn") { return "arrow.uturn.down" }
+        if text.contains("u-turn") || text.contains("u turn") || text.contains("turn around") { return "arrow.uturn.down" }
         if text.contains("slight left") { return "arrow.up.left" }
         if text.contains("slight right") { return "arrow.up.right" }
         if text.contains("sharp left") { return "arrow.turn.up.left" }

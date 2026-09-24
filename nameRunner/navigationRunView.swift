@@ -99,20 +99,20 @@ struct NavigationRunView: View {
 
     private var turnBanner: some View {
         HStack(alignment: .center, spacing: 14) {
-            Image(systemName: iconName(for: session.progress?.upcomingInstruction ?? ""))
+            Image(systemName: iconName(for: session.nextManeuver?.instruction ?? ""))
                 .font(.system(size: 30, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(width: 48, height: 48)
 
             VStack(alignment: .leading, spacing: 2) {
-                if let progress = session.progress,
-                   !progress.hasArrived,
-                   progress.distanceToNextTurn > 0 {
-                    Text("In \(Self.distanceFormatter.string(fromDistance: progress.distanceToNextTurn))")
+                if let maneuver = session.nextManeuver,
+                   !session.hasArrived,
+                   maneuver.distance > 0 {
+                    Text("In \(Self.distanceFormatter.string(fromDistance: maneuver.distance))")
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.85))
                 }
-                Text(session.progress?.upcomingInstruction ?? "")
+                Text(session.nextManeuver?.instruction ?? "")
                     .font(.headline)
                     .foregroundColor(.white)
                     .lineLimit(2)
@@ -133,7 +133,7 @@ struct NavigationRunView: View {
     private var bottomBar: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(Self.distanceFormatter.string(fromDistance: session.progress?.remainingDistance ?? 0))
+                Text(Self.distanceFormatter.string(fromDistance: session.remainingMeters ?? 0))
                     .font(.title3.bold())
                     .monospacedDigit()
                 Text("remaining")
@@ -178,7 +178,7 @@ struct NavigationRunView: View {
     private func iconName(for instructions: String) -> String {
         let text = instructions.lowercased()
         if text.contains("arriv") || text.contains("destination") { return "flag.checkered" }
-        if text.contains("u-turn") || text.contains("u turn") { return "arrow.uturn.down" }
+        if text.contains("u-turn") || text.contains("u turn") || text.contains("turn around") { return "arrow.uturn.down" }
         if text.contains("slight left") { return "arrow.up.left" }
         if text.contains("slight right") { return "arrow.up.right" }
         if text.contains("sharp left") { return "arrow.turn.up.left" }
